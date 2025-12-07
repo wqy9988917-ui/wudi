@@ -9,8 +9,566 @@
     <!-- 引入Font Awesome图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ... 前面的CSS样式保持不变 ... */
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 头部样式 */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            color: #2575fc;
+            font-size: 28px;
+        }
+        
+        .logo-icon {
+            font-size: 32px;
+            color: #6a11cb;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #6a11cb;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        /* 登录面板 */
+        .login-panel {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+            text-align: center;
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .login-panel h2 {
+            color: #2575fc;
+            margin-bottom: 15px;
+        }
+        
+        .login-panel p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .login-form {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        input[type="text"], input[type="number"], select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: #2575fc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: #6a11cb;
+        }
+        
+        /* 任务列表样式 */
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f8f9ff;
+            border-radius: 10px;
+            border-left: 5px solid #6a11cb;
+            transition: all 0.3s;
+        }
+        
+        .task-item:hover {
+            background-color: #edf1ff;
+        }
+        
+        .task-info h3 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .task-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .task-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .task-tag.countdown {
+            background-color: #e1f5fe;
+            color: #0288d1;
+        }
+        
+        .task-tag.stopwatch {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .timer-btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 70px;
+        }
+        
+        .timer-btn.start {
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+        }
+        
+        .timer-btn.delete {
+            background: linear-gradient(to right, #f44336, #FF9800);
+        }
+        
+        /* 表单样式 */
+        .add-task-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        /* 计时器样式 */
+        .focus-timer {
+            text-align: center;
+            padding: 25px;
+        }
+        
+        .timer-display {
+            font-size: 80px;
+            font-weight: bold;
+            color: #2575fc;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .timer-presets {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            padding: 12px 20px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .preset-btn.active {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+        }
+        
+        .custom-time {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .custom-time input {
+            width: 80px;
+            text-align: center;
+        }
+        
+        .timer-control {
+            font-size: 18px;
+            padding: 15px 40px;
+            margin: 10px;
+        }
+        
+        .timer-control.stop {
+            background: linear-gradient(to right, #f44336, #FF9800);
+        }
+        
+        /* 白噪音样式 */
+        .white-noise-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .white-noise {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .noise-option {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            background-color: #f8f9ff;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .noise-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .noise-option.active {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+        }
+        
+        .noise-option.playing {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .noise-option.playing::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(0.8); opacity: 1; }
+        }
+        
+        .noise-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        /* 音频控制样式 */
+        .noise-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .noise-control-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            min-width: 100px;
+            justify-content: center;
+        }
+        
+        .noise-control-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(106, 17, 203, 0.3);
+        }
+        
+        .noise-control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .noise-control-btn.play {
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+        }
+        
+        .noise-control-btn.pause {
+            background: linear-gradient(to right, #FF9800, #FFB74D);
+        }
+        
+        .noise-control-btn.stop {
+            background: linear-gradient(to right, #f44336, #FF7043);
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #ddd, #6a11cb);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #6a11cb;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #6a11cb;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .volume-icon {
+            font-size: 20px;
+            color: #666;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .now-playing {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9ff;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .now-playing i {
+            margin-right: 8px;
+        }
+        
+        .now-playing.playing {
+            color: #4CAF50;
+            background-color: #e8f5e9;
+        }
+        
+        .now-playing.paused {
+            color: #FF9800;
+            background-color: #fff3e0;
+        }
+        
+        /* 图表容器 */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .chart-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        /* 通知样式 */
         .notification {
             position: fixed;
             top: 20px;
@@ -50,11 +608,72 @@
             to { opacity: 0; visibility: hidden; }
         }
         
-        /* 白噪音部分的CSS保持不变 */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .main-content, .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .login-form {
+                flex-direction: column;
+            }
+            
+            .timer-display {
+                font-size: 60px;
+            }
+            
+            .timer-presets {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .preset-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .white-noise {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .noise-controls {
+                flex-direction: column;
+            }
+            
+            .noise-control-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- 头部 -->
         <header>
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-clock"></i></div>
@@ -71,6 +690,7 @@
             </div>
         </header>
         
+        <!-- 登录面板 -->
         <div id="loginPanel" class="login-panel">
             <h2><i class="fas fa-user-circle"></i> 欢迎使用时间管理工具</h2>
             <p>请输入您的名字开始专注时间管理，提升工作效率</p>
@@ -83,8 +703,10 @@
             </div>
         </div>
         
+        <!-- 主应用内容 -->
         <div id="mainApp" class="hidden">
             <div class="main-content">
+                <!-- 任务列表卡片 -->
                 <div class="card">
                     <h2><i class="fas fa-tasks"></i> 任务清单</h2>
                     <div id="taskList">
@@ -119,6 +741,7 @@
                     </form>
                 </div>
                 
+                <!-- 专注计时器卡片 -->
                 <div class="card focus-timer">
                     <h2><i class="fas fa-hourglass-half"></i> 专注计时器</h2>
                     <div class="timer-display" id="timerDisplay">25:00</div>
@@ -137,34 +760,35 @@
                     
                     <div>
                         <button class="timer-control" id="startTimerBtn"><i class="fas fa-play"></i> 开始专注</button>
-                        <button class="timer-control stop" id="stopTimerBtn"><i class="fas fa-stop"></i> 结束专注</button>
+                        <button class="timer-control stop" id="stopTimerBtn" style="display: none;"><i class="fas fa-stop"></i> 结束专注</button>
                     </div>
                     
+                    <!-- 白噪音部分 -->
                     <div class="white-noise-section">
                         <h3><i class="fas fa-volume-up"></i> 白噪音</h3>
                         <p style="margin-bottom: 15px; color: #666;">选择背景音提升专注力</p>
                         <div class="white-noise">
-                            <div class="noise-option" data-sound="rain" data-sound-name="下雨声">
+                            <div class="noise-option" data-sound="rain">
                                 <div class="noise-icon">🌧️</div>
                                 <div>下雨声</div>
                             </div>
-                            <div class="noise-option" data-sound="forest" data-sound-name="森林">
+                            <div class="noise-option" data-sound="forest">
                                 <div class="noise-icon">🌲</div>
                                 <div>森林</div>
                             </div>
-                            <div class="noise-option" data-sound="coffee" data-sound-name="咖啡馆">
+                            <div class="noise-option" data-sound="coffee">
                                 <div class="noise-icon">☕</div>
                                 <div>咖啡馆</div>
                             </div>
-                            <div class="noise-option" data-sound="waves" data-sound-name="海浪声">
+                            <div class="noise-option" data-sound="waves">
                                 <div class="noise-icon">🌊</div>
                                 <div>海浪声</div>
                             </div>
-                            <div class="noise-option" data-sound="fireplace" data-sound-name="篝火声">
+                            <div class="noise-option" data-sound="fireplace">
                                 <div class="noise-icon">🔥</div>
                                 <div>篝火声</div>
                             </div>
-                            <div class="noise-option" data-sound="white-noise" data-sound-name="白噪音">
+                            <div class="noise-option" data-sound="white-noise">
                                 <div class="noise-icon">📻</div>
                                 <div>白噪音</div>
                             </div>
@@ -198,6 +822,7 @@
                 </div>
             </div>
             
+            <!-- 图表容器 -->
             <div class="charts-container">
                 <div class="chart-card">
                     <h2><i class="fas fa-chart-pie"></i> 今日专注时长</h2>
@@ -235,6 +860,7 @@
         </footer>
     </div>
 
+    <!-- 通知区域 -->
     <div id="notification" class="notification hidden"></div>
 
     <script>
@@ -244,15 +870,16 @@
         let currentTimer = null;
         let timerSeconds = 25 * 60;
         let timerRunning = false;
-        let selectedSound = 'rain';  // 默认选择下雨声
+        let selectedSound = 'rain';
         let focusSessions = [];
         
         // 音频相关变量
         let audioPlayer = null;
         let isAudioPlaying = false;
         let currentVolume = 0.5;
+        let audioContext = null;
         
-        // 修复：使用更可靠的免费音频源
+        // 修复的音频源 - 使用可靠的免费音频源
         const audioSources = {
             'rain': 'https://assets.mixkit.co/sfx/preview/mixkit-rain-loop-1244.mp3',
             'forest': 'https://assets.mixkit.co/sfx/preview/mixkit-forest-loop-1248.mp3',
@@ -264,52 +891,57 @@
         
         // 从本地存储加载数据
         function loadFromLocalStorage() {
-            const savedTasks = localStorage.getItem('focusTasks');
-            const savedSessions = localStorage.getItem('focusSessions');
-            const savedVolume = localStorage.getItem('audioVolume');
-            const savedSound = localStorage.getItem('selectedSound');
-            
-            if (savedTasks) {
-                tasks = JSON.parse(savedTasks);
-            }
-            
-            if (savedSessions) {
-                focusSessions = JSON.parse(savedSessions);
-            }
-            
-            if (savedVolume) {
-                currentVolume = parseFloat(savedVolume);
-                if (document.getElementById('volumeSlider')) {
-                    document.getElementById('volumeSlider').value = currentVolume * 100;
+            try {
+                const savedTasks = localStorage.getItem('focusTasks');
+                const savedSessions = localStorage.getItem('focusSessions');
+                const savedVolume = localStorage.getItem('audioVolume');
+                const savedSound = localStorage.getItem('selectedSound');
+                const savedUser = localStorage.getItem('currentUser');
+                
+                if (savedTasks) {
+                    tasks = JSON.parse(savedTasks);
                 }
-                updateVolumeIcon();
-            }
-            
-            if (savedSound) {
-                selectedSound = savedSound;
-            }
-            
-            // 检查是否有已保存的用户登录状态
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
+                
+                if (savedSessions) {
+                    focusSessions = JSON.parse(savedSessions);
+                }
+                
+                if (savedVolume) {
+                    currentVolume = parseFloat(savedVolume);
+                    const volumeSlider = document.getElementById('volumeSlider');
+                    if (volumeSlider) {
+                        volumeSlider.value = currentVolume * 100;
+                        updateVolumeIcon();
+                    }
+                }
+                
+                if (savedSound) {
+                    selectedSound = savedSound;
+                }
+                
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                }
+            } catch (error) {
+                console.error('加载本地存储数据失败:', error);
             }
         }
         
         // 保存数据到本地存储
         function saveToLocalStorage() {
-            localStorage.setItem('focusTasks', JSON.stringify(tasks));
-            localStorage.setItem('focusSessions', JSON.stringify(focusSessions));
-            localStorage.setItem('audioVolume', currentVolume.toString());
-            
-            if (selectedSound) {
+            try {
+                localStorage.setItem('focusTasks', JSON.stringify(tasks));
+                localStorage.setItem('focusSessions', JSON.stringify(focusSessions));
+                localStorage.setItem('audioVolume', currentVolume.toString());
                 localStorage.setItem('selectedSound', selectedSound);
-            }
-            
-            if (currentUser) {
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            } else {
-                localStorage.removeItem('currentUser');
+                
+                if (currentUser) {
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                } else {
+                    localStorage.removeItem('currentUser');
+                }
+            } catch (error) {
+                console.error('保存到本地存储失败:', error);
             }
         }
         
@@ -351,26 +983,51 @@
             
             // 检查用户登录状态
             if (currentUser) {
-                userName.textContent = currentUser.name;
-                userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
-                loginPanel.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                userInfo.classList.remove('hidden');
+                if (userName) userName.textContent = currentUser.name;
+                if (userAvatar) userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+                if (loginPanel) loginPanel.classList.add('hidden');
+                if (mainApp) mainApp.classList.remove('hidden');
+                if (userInfo) userInfo.classList.remove('hidden');
             } else {
-                // 如果没有登录用户，显示登录面板
-                loginPanel.classList.remove('hidden');
-                mainApp.classList.add('hidden');
-                userInfo.classList.add('hidden');
+                if (loginPanel) loginPanel.classList.remove('hidden');
+                if (mainApp) mainApp.classList.add('hidden');
+                if (userInfo) userInfo.classList.add('hidden');
             }
-            
-            // 初始化图表
-            initializeCharts();
             
             // 初始化音频
             initializeAudio();
             
-            // 事件监听
-            loginBtn.addEventListener('click', handleLogin);
+            // 初始化图表
+            initializeCharts();
+            
+            // 初始化UI状态
+            updateUIState();
+            
+            // 设置默认白噪音
+            setTimeout(() => {
+                if (selectedSound) {
+                    selectSound(selectedSound);
+                } else {
+                    selectSound('rain');
+                }
+            }, 100);
+            
+            // 绑定事件监听器
+            bindEventListeners();
+            
+            // 初始更新计时器显示
+            updateTimerDisplay();
+            
+            // 渲染任务列表
+            renderTaskList();
+        });
+        
+        // 绑定事件监听器
+        function bindEventListeners() {
+            if (loginBtn) {
+                loginBtn.addEventListener('click', handleLogin);
+            }
+            
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', handleLogout);
             }
@@ -408,7 +1065,9 @@
             noiseOptions.forEach(option => {
                 option.addEventListener('click', function() {
                     const soundType = this.getAttribute('data-sound');
-                    selectSound(soundType);
+                    if (soundType) {
+                        selectSound(soundType);
+                    }
                 });
             });
             
@@ -428,72 +1087,62 @@
             if (volumeSlider) {
                 volumeSlider.addEventListener('input', updateVolume);
             }
-            
-            // 设置默认白噪音
-            if (selectedSound) {
-                selectSound(selectedSound);
-            } else {
-                selectSound('rain');
-            }
-            
-            // 初始更新计时器显示
-            updateTimerDisplay();
-            
-            // 渲染任务列表
-            renderTaskList();
-        });
+        }
         
         // 初始化音频
         function initializeAudio() {
-            // 创建音频元素
-            audioPlayer = new Audio();
-            audioPlayer.loop = true;
-            audioPlayer.volume = currentVolume;
-            
-            // 音频事件监听
-            audioPlayer.addEventListener('playing', function() {
-                updateNowPlayingStatus();
-            });
-            
-            audioPlayer.addEventListener('pause', function() {
-                updateNowPlayingStatus();
-            });
-            
-            audioPlayer.addEventListener('ended', function() {
-                updateNowPlayingStatus();
-            });
-            
-            audioPlayer.addEventListener('error', function(e) {
-                console.error('音频错误:', e);
-                showNotification('音频加载失败，请检查网络连接', 'error');
-                updateNowPlayingStatus();
-            });
-            
-            // 修复：添加加载事件
-            audioPlayer.addEventListener('canplaythrough', function() {
-                console.log('音频可以播放');
-            });
-            
-            // 修复：用户交互后初始化音频
-            document.addEventListener('click', function initAudio() {
-                if (audioPlayer) {
-                    // 静音然后恢复，以激活音频上下文
-                    audioPlayer.muted = false;
-                    audioPlayer.volume = currentVolume;
-                    
-                    // 预加载第一个音频
-                    if (selectedSound && audioSources[selectedSound]) {
-                        audioPlayer.src = audioSources[selectedSound];
-                        audioPlayer.load();
+            try {
+                // 创建音频元素
+                audioPlayer = new Audio();
+                audioPlayer.loop = true;
+                audioPlayer.volume = currentVolume;
+                
+                // 设置预加载
+                audioPlayer.preload = 'auto';
+                
+                // 音频事件监听
+                audioPlayer.addEventListener('canplaythrough', function() {
+                    console.log('音频可以播放');
+                });
+                
+                audioPlayer.addEventListener('playing', function() {
+                    isAudioPlaying = true;
+                    updateNowPlayingStatus();
+                });
+                
+                audioPlayer.addEventListener('pause', function() {
+                    isAudioPlaying = false;
+                    updateNowPlayingStatus();
+                });
+                
+                audioPlayer.addEventListener('ended', function() {
+                    isAudioPlaying = false;
+                    updateNowPlayingStatus();
+                });
+                
+                audioPlayer.addEventListener('error', function(e) {
+                    console.error('音频错误:', e);
+                    showNotification('音频加载失败，请检查网络连接', 'error');
+                });
+                
+                // 用户交互后启用音频
+                document.addEventListener('click', function initAudio() {
+                    if (audioPlayer) {
+                        audioPlayer.muted = false;
+                        audioPlayer.volume = currentVolume;
                     }
-                }
-            }, { once: true }); // 只执行一次
+                }, { once: true });
+                
+            } catch (error) {
+                console.error('初始化音频失败:', error);
+                showNotification('音频初始化失败，某些功能可能不可用', 'warning');
+            }
         }
         
         // 选择声音
         function selectSound(soundType) {
             if (!soundType || !audioSources[soundType]) {
-                console.error('无效的声音类型:', soundType);
+                showNotification('无效的声音类型', 'error');
                 return;
             }
             
@@ -502,54 +1151,67 @@
                 option.classList.remove('active', 'playing');
             });
             
-            // 设置当前选中
+            // 找到选中的选项
             const selectedOption = document.querySelector(`.noise-option[data-sound="${soundType}"]`);
-            if (selectedOption) {
-                selectedOption.classList.add('active');
-                selectedSound = soundType;
-                
-                // 保存选择
-                localStorage.setItem('selectedSound', soundType);
-                
-                // 启用控制按钮
-                if (playNoiseBtn) playNoiseBtn.disabled = false;
-                if (pauseNoiseBtn) pauseNoiseBtn.disabled = false;
-                if (stopNoiseBtn) stopNoiseBtn.disabled = false;
-                
-                // 获取音频URL
-                const audioUrl = audioSources[soundType];
-                if (!audioUrl) {
-                    showNotification('音频源无效', 'error');
-                    return;
-                }
-                
-                // 如果已经在播放，停止当前音频
-                if (audioPlayer && !audioPlayer.paused) {
-                    audioPlayer.pause();
-                    audioPlayer.currentTime = 0;
-                }
-                
-                // 设置新的音频源
-                audioPlayer.src = audioUrl;
-                audioPlayer.load();
-                
-                // 显示通知
-                const soundName = selectedOption.getAttribute('data-sound-name') || soundType;
-                showNotification(`已选择: ${soundName}`, 'info');
-                
-                // 更新当前播放状态
-                updateNowPlayingStatus();
+            if (!selectedOption) {
+                console.error('未找到对应的声音选项:', soundType);
+                return;
             }
+            
+            // 设置当前选中
+            selectedOption.classList.add('active');
+            selectedSound = soundType;
+            
+            // 保存选择
+            saveToLocalStorage();
+            
+            // 启用控制按钮
+            if (playNoiseBtn) playNoiseBtn.disabled = false;
+            if (pauseNoiseBtn) pauseNoiseBtn.disabled = false;
+            if (stopNoiseBtn) stopNoiseBtn.disabled = false;
+            
+            // 获取音频URL
+            const audioUrl = audioSources[soundType];
+            
+            // 如果音频已经在播放，停止当前音频
+            if (audioPlayer && !audioPlayer.paused) {
+                stopAudio();
+            }
+            
+            // 设置新的音频源
+            if (audioPlayer) {
+                audioPlayer.src = audioUrl;
+                audioPlayer.load().catch(error => {
+                    console.error('音频加载失败:', error);
+                    showNotification('音频加载失败，请检查网络连接', 'error');
+                });
+            }
+            
+            // 显示通知
+            const soundName = selectedOption.querySelector('div:last-child').textContent;
+            showNotification(`已选择: ${soundName}`, 'success');
+            
+            // 更新当前播放状态
+            updateNowPlayingStatus();
         }
         
         // 播放音频
         function playAudio() {
-            if (!audioPlayer || !selectedSound) {
+            if (!audioPlayer) {
+                showNotification('音频播放器未初始化', 'error');
+                return;
+            }
+            
+            if (!selectedSound) {
                 showNotification('请先选择一种白噪音', 'error');
                 return;
             }
             
-            // 如果音频没有源，设置源
+            if (isAudioPlaying) {
+                pauseAudio();
+                return;
+            }
+            
             if (!audioPlayer.src) {
                 const audioUrl = audioSources[selectedSound];
                 if (!audioUrl) {
@@ -559,16 +1221,16 @@
                 audioPlayer.src = audioUrl;
             }
             
-            // 尝试播放
             audioPlayer.play()
                 .then(() => {
+                    console.log('音频播放成功');
                     isAudioPlaying = true;
                     updateNowPlayingStatus();
                     showNotification('白噪音播放中', 'success');
                 })
                 .catch(error => {
-                    console.error('播放失败:', error);
-                    showNotification('音频播放失败: ' + error.message, 'error');
+                    console.error('音频播放失败:', error);
+                    showNotification('播放失败: ' + error.message, 'error');
                 });
         }
         
@@ -604,7 +1266,7 @@
             }
             
             // 保存音量设置
-            localStorage.setItem('audioVolume', currentVolume.toString());
+            saveToLocalStorage();
             
             // 更新音量图标
             updateVolumeIcon();
@@ -635,7 +1297,7 @@
             const selectedOption = document.querySelector(`.noise-option[data-sound="${selectedSound}"]`);
             if (!selectedOption) return;
             
-            const soundName = selectedOption.getAttribute('data-sound-name') || selectedSound;
+            const soundName = selectedOption.querySelector('div:last-child').textContent;
             const volumePercent = Math.round(currentVolume * 100);
             
             // 更新noise-option的播放状态
@@ -650,33 +1312,27 @@
                     nowPlaying.className = 'now-playing playing';
                     selectedOption.classList.add('playing');
                     
-                    // 更新按钮状态
+                    // 更新按钮文本
                     if (playNoiseBtn) {
                         playNoiseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                        playNoiseBtn.classList.remove('play');
-                        playNoiseBtn.classList.add('pause');
                     }
                 } else if (audioPlayer.currentTime > 0) {
                     // 已暂停
                     nowPlaying.innerHTML = `<i class="fas fa-pause" style="color:#FF9800;"></i> 已暂停: ${soundName}`;
                     nowPlaying.className = 'now-playing paused';
                     
-                    // 更新按钮状态
+                    // 更新按钮文本
                     if (playNoiseBtn) {
                         playNoiseBtn.innerHTML = '<i class="fas fa-play"></i> 播放';
-                        playNoiseBtn.classList.remove('pause');
-                        playNoiseBtn.classList.add('play');
                     }
                 } else {
                     // 已停止
                     nowPlaying.innerHTML = `<i class="fas fa-stop" style="color:#666;"></i> 已停止: ${soundName}`;
                     nowPlaying.className = 'now-playing';
                     
-                    // 更新按钮状态
+                    // 更新按钮文本
                     if (playNoiseBtn) {
                         playNoiseBtn.innerHTML = '<i class="fas fa-play"></i> 播放';
-                        playNoiseBtn.classList.remove('pause');
-                        playNoiseBtn.classList.add('play');
                     }
                 }
             } else {
@@ -691,7 +1347,20 @@
             
             notification.textContent = message;
             notification.className = 'notification';
-            notification.classList.add(type);
+            
+            switch(type) {
+                case 'success':
+                    notification.classList.add('success');
+                    break;
+                case 'error':
+                    notification.classList.add('error');
+                    break;
+                case 'warning':
+                    notification.classList.add('warning');
+                    break;
+                default:
+                    notification.classList.add('info');
+            }
             
             notification.classList.remove('hidden');
             
@@ -702,6 +1371,8 @@
         
         // 处理登录
         function handleLogin() {
+            if (!usernameInput) return;
+            
             const username = usernameInput.value.trim();
             if (!username) {
                 showNotification('请输入您的名字', 'error');
@@ -715,19 +1386,21 @@
             };
             
             // 保存用户信息
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            saveToLocalStorage();
             
             // 更新UI
-            userName.textContent = currentUser.name;
-            userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
-            
-            // 切换显示
-            loginPanel.classList.add('hidden');
-            mainApp.classList.remove('hidden');
-            userInfo.classList.remove('hidden');
+            if (userName) userName.textContent = currentUser.name;
+            if (userAvatar) userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+            if (loginPanel) loginPanel.classList.add('hidden');
+            if (mainApp) mainApp.classList.remove('hidden');
+            if (userInfo) userInfo.classList.remove('hidden');
             
             showNotification(`欢迎回来，${currentUser.name}！`, 'success');
-            updateCharts();
+            
+            // 更新图表
+            if (typeof updateCharts === 'function') {
+                updateCharts();
+            }
         }
         
         // 处理退出登录
@@ -745,159 +1418,12 @@
             localStorage.removeItem('currentUser');
             
             // 切换显示
-            loginPanel.classList.remove('hidden');
-            mainApp.classList.add('hidden');
-            userInfo.classList.add('hidden');
+            if (loginPanel) loginPanel.classList.remove('hidden');
+            if (mainApp) mainApp.classList.add('hidden');
+            if (userInfo) userInfo.classList.add('hidden');
             
-            usernameInput.value = '';
+            if (usernameInput) usernameInput.value = '';
             showNotification('您已退出登录', 'info');
-        }
-        
-        // 更新计时器显示
-        function updateTimerDisplay() {
-            if (!timerDisplay) return;
-            
-            const minutes = parseInt(customMinutes ? customMinutes.value : 25) || 25;
-            timerSeconds = minutes * 60;
-            
-            const displayMinutes = Math.floor(timerSeconds / 60);
-            const displaySeconds = timerSeconds % 60;
-            
-            timerDisplay.textContent = 
-                `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
-        }
-        
-        // 开始计时器
-        function startTimer() {
-            if (timerRunning) {
-                showNotification('计时器已经在运行中', 'info');
-                return;
-            }
-            
-            const minutes = parseInt(customMinutes ? customMinutes.value : 25) || 25;
-            if (minutes < 1 || minutes > 180) {
-                showNotification('时长应在1-180分钟之间', 'error');
-                return;
-            }
-            
-            timerSeconds = minutes * 60;
-            timerRunning = true;
-            
-            // 更新按钮状态
-            if (startTimerBtn) {
-                startTimerBtn.disabled = true;
-                startTimerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 专注中...';
-            }
-            
-            if (stopTimerBtn) {
-                stopTimerBtn.classList.remove('hidden');
-            }
-            
-            // 更新任务列表中的按钮状态
-            document.querySelectorAll('.timer-btn.start').forEach(btn => {
-                btn.disabled = true;
-            });
-            
-            currentTimer = setInterval(() => {
-                timerSeconds--;
-                
-                const displayMinutes = Math.floor(timerSeconds / 60);
-                const displaySeconds = timerSeconds % 60;
-                
-                if (timerDisplay) {
-                    timerDisplay.textContent = 
-                        `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
-                }
-                
-                // 时间到
-                if (timerSeconds <= 0) {
-                    stopTimer();
-                    showNotification('专注时间结束！休息一下吧', 'success');
-                    
-                    // 保存专注记录
-                    const minutesElapsed = minutes;
-                    saveFocusSession(minutesElapsed);
-                    
-                    // 播放提示音
-                    playTimerEndSound();
-                }
-            }, 1000);
-            
-            showNotification(`专注计时开始: ${minutes}分钟`, 'info');
-        }
-        
-        // 停止计时器
-        function stopTimer() {
-            if (!timerRunning) return;
-            
-            timerRunning = false;
-            clearInterval(currentTimer);
-            
-            // 更新按钮状态
-            if (startTimerBtn) {
-                startTimerBtn.disabled = false;
-                startTimerBtn.innerHTML = '<i class="fas fa-play"></i> 开始专注';
-            }
-            
-            if (stopTimerBtn) {
-                stopTimerBtn.classList.add('hidden');
-            }
-            
-            // 更新任务列表中的按钮状态
-            document.querySelectorAll('.timer-btn.start').forEach(btn => {
-                btn.disabled = false;
-            });
-            
-            // 保存专注记录（如果计时超过1分钟）
-            const minutes = parseInt(customMinutes ? customMinutes.value : 25) || 25;
-            const minutesElapsed = minutes - Math.ceil(timerSeconds / 60);
-            if (minutesElapsed > 0) {
-                saveFocusSession(minutesElapsed);
-                showNotification(`专注完成: ${minutesElapsed}分钟`, 'success');
-            } else {
-                showNotification('专注已取消', 'info');
-            }
-        }
-        
-        // 保存专注会话
-        function saveFocusSession(minutes) {
-            const session = {
-                id: Date.now(),
-                minutes: minutes,
-                date: new Date().toISOString(),
-                task: document.getElementById('taskName') ? document.getElementById('taskName').value || '自定义专注' : '自定义专注'
-            };
-            
-            focusSessions.push(session);
-            
-            // 保存到本地存储
-            saveToLocalStorage();
-            
-            // 更新图表
-            updateCharts();
-        }
-        
-        // 播放计时结束提示音
-        function playTimerEndSound() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 1);
-            } catch (error) {
-                console.log('音频上下文不支持，跳过提示音');
-            }
         }
         
         // 处理添加任务
@@ -1044,6 +1570,157 @@
             showNotification(`任务"${taskName}"已删除`, 'info');
         }
         
+        // 更新计时器显示
+        function updateTimerDisplay() {
+            if (!timerDisplay) return;
+            
+            const minutes = parseInt(customMinutes ? customMinutes.value : 25) || 25;
+            timerSeconds = minutes * 60;
+            
+            const displayMinutes = Math.floor(timerSeconds / 60);
+            const displaySeconds = timerSeconds % 60;
+            
+            timerDisplay.textContent = 
+                `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // 开始计时器
+        function startTimer() {
+            if (timerRunning) {
+                showNotification('计时器已经在运行中', 'info');
+                return;
+            }
+            
+            const minutes = parseInt(customMinutes ? customMinutes.value : 25) || 25;
+            if (minutes < 1 || minutes > 180) {
+                showNotification('时长应在1-180分钟之间', 'error');
+                return;
+            }
+            
+            timerSeconds = minutes * 60;
+            timerRunning = true;
+            
+            // 更新按钮状态
+            if (startTimerBtn) {
+                startTimerBtn.disabled = true;
+                startTimerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 专注中...';
+            }
+            
+            if (stopTimerBtn) {
+                stopTimerBtn.style.display = 'inline-block';
+            }
+            
+            // 更新任务列表中的按钮状态
+            document.querySelectorAll('.timer-btn.start').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            currentTimer = setInterval(() => {
+                timerSeconds--;
+                
+                const displayMinutes = Math.floor(timerSeconds / 60);
+                const displaySeconds = timerSeconds % 60;
+                
+                if (timerDisplay) {
+                    timerDisplay.textContent = 
+                        `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+                }
+                
+                // 时间到
+                if (timerSeconds <= 0) {
+                    stopTimer();
+                    showNotification('专注时间结束！休息一下吧', 'success');
+                    
+                    // 保存专注记录
+                    const minutesElapsed = minutes;
+                    saveFocusSession(minutesElapsed);
+                    
+                    // 播放提示音
+                    playTimerEndSound();
+                }
+            }, 1000);
+            
+            showNotification(`专注计时开始: ${minutes}分钟`, 'info');
+        }
+        
+        // 停止计时器
+        function stopTimer() {
+            if (!timerRunning) return;
+            
+            timerRunning = false;
+            clearInterval(currentTimer);
+            
+            // 更新按钮状态
+            if (startTimerBtn) {
+                startTimerBtn.disabled = false;
+                startTimerBtn.innerHTML = '<i class="fas fa-play"></i> 开始专注';
+            }
+            
+            if (stopTimerBtn) {
+                stopTimerBtn.style.display = 'none';
+            }
+            
+            // 更新任务列表中的按钮状态
+            document.querySelectorAll('.timer-btn.start').forEach(btn => {
+                btn.disabled = false;
+            });
+            
+            // 保存专注记录（如果计时超过1分钟）
+            const minutes = parseInt(customMinutes ? customMinutes.value : 25) || 25;
+            const minutesElapsed = minutes - Math.ceil(timerSeconds / 60);
+            if (minutesElapsed > 0) {
+                saveFocusSession(minutesElapsed);
+                showNotification(`专注完成: ${minutesElapsed}分钟`, 'success');
+            } else {
+                showNotification('专注已取消', 'info');
+            }
+            
+            updateTimerDisplay();
+        }
+        
+        // 保存专注会话
+        function saveFocusSession(minutes) {
+            const session = {
+                id: Date.now(),
+                minutes: minutes,
+                date: new Date().toISOString(),
+                task: document.getElementById('taskName') ? document.getElementById('taskName').value || '自定义专注' : '自定义专注'
+            };
+            
+            focusSessions.push(session);
+            
+            // 保存到本地存储
+            saveToLocalStorage();
+            
+            // 更新图表
+            if (typeof updateCharts === 'function') {
+                updateCharts();
+            }
+        }
+        
+        // 播放计时结束提示音
+        function playTimerEndSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 1);
+            } catch (error) {
+                console.log('音频上下文不支持，跳过提示音');
+            }
+        }
+        
         // 初始化图表
         function initializeCharts() {
             // 检查Canvas元素是否存在
@@ -1057,14 +1734,13 @@
                 return;
             }
             
-            // 每日专注时长图表（饼图）
-            const dailyCtx = dailyCanvas.getContext('2d');
-            dailyChart = new Chart(dailyCtx, {
-                type: 'pie',
+            // 每日专注时长图表
+            dailyChart = new Chart(dailyCanvas, {
+                type: 'doughnut',
                 data: {
                     labels: ['已完成', '剩余'],
                     datasets: [{
-                        data: [85, 65],
+                        data: [0, 100],
                         backgroundColor: [
                             '#6a11cb',
                             '#2575fc'
@@ -1090,15 +1766,14 @@
                 }
             });
             
-            // 每周专注趋势图表（柱状图）
-            const weeklyCtx = weeklyCanvas.getContext('2d');
-            weeklyChart = new Chart(weeklyCtx, {
+            // 每周专注趋势图表
+            weeklyChart = new Chart(weeklyCanvas, {
                 type: 'bar',
                 data: {
                     labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
                     datasets: [{
                         label: '专注时长(分钟)',
-                        data: [45, 85, 120, 60, 90, 30, 75],
+                        data: [0, 0, 0, 0, 0, 0, 0],
                         backgroundColor: '#6a11cb',
                         borderColor: '#2575fc',
                         borderWidth: 1
@@ -1119,15 +1794,14 @@
                 }
             });
             
-            // 月度专注统计图表（折线图）
-            const monthlyCtx = monthlyCanvas.getContext('2d');
-            monthlyChart = new Chart(monthlyCtx, {
+            // 月度专注统计图表
+            monthlyChart = new Chart(monthlyCanvas, {
                 type: 'line',
                 data: {
                     labels: ['第1周', '第2周', '第3周', '第4周'],
                     datasets: [{
                         label: '每周专注时长',
-                        data: [320, 450, 380, 520],
+                        data: [0, 0, 0, 0],
                         borderColor: '#2575fc',
                         backgroundColor: 'rgba(37, 117, 252, 0.1)',
                         borderWidth: 3,
@@ -1150,14 +1824,13 @@
                 }
             });
             
-            // 任务分布图表（饼图）
-            const taskCtx = taskCanvas.getContext('2d');
-            taskDistributionChart = new Chart(taskCtx, {
-                type: 'doughnut',
+            // 任务分布图表
+            taskDistributionChart = new Chart(taskCanvas, {
+                type: 'pie',
                 data: {
                     labels: ['学习', '工作', '阅读', '其他'],
                     datasets: [{
-                        data: [40, 35, 15, 10],
+                        data: [0, 0, 0, 0],
                         backgroundColor: [
                             '#6a11cb',
                             '#2575fc',
@@ -1177,43 +1850,80 @@
                     }
                 }
             });
+            
+            updateCharts();
         }
         
         // 更新图表
         function updateCharts() {
-            if (!dailyChart || !weeklyChart || !monthlyChart) return;
+            if (!dailyChart || !weeklyChart || !monthlyChart || !taskDistributionChart) return;
             
-            // 如果有专注记录，使用实际数据
-            if (focusSessions.length > 0) {
-                // 计算今日数据
-                const today = new Date().toDateString();
-                const todaySessions = focusSessions.filter(s => new Date(s.date).toDateString() === today);
-                const todayMinutes = todaySessions.reduce((sum, s) => sum + s.minutes, 0);
-                
-                // 更新每日图表
-                dailyChart.data.datasets[0].data = [todayMinutes, Math.max(0, 150 - todayMinutes)];
-                dailyChart.update();
-                
-                // 更新任务分布图表
-                if (typeof updateTaskDistributionChart === 'function') {
-                    updateTaskDistributionChart();
-                }
-            }
+            // 计算今日数据
+            const today = new Date().toDateString();
+            const todaySessions = focusSessions.filter(s => new Date(s.date).toDateString() === today);
+            const todayMinutes = todaySessions.reduce((sum, s) => sum + s.minutes, 0);
             
-            // 模拟一些数据变化
-            const randomIncrement = Math.floor(Math.random() * 20) + 5;
+            // 更新每日图表
+            dailyChart.data.datasets[0].data = [todayMinutes, Math.max(0, 150 - todayMinutes)];
+            dailyChart.update();
             
-            // 更新每周图表（模拟今天的数据）
-            const todayIndex = new Date().getDay() - 1;
-            if (todayIndex >= 0 && todayIndex < 7) {
-                weeklyChart.data.datasets[0].data[todayIndex] += randomIncrement;
+            // 更新任务分布图表
+            updateTaskDistributionChart();
+            
+            // 更新每周图表
+            const dayOfWeek = new Date().getDay();
+            if (dayOfWeek >= 1 && dayOfWeek <= 7) {
+                weeklyChart.data.datasets[0].data[dayOfWeek - 1] += todayMinutes;
                 weeklyChart.update();
             }
             
-            // 更新月度图表（模拟本周的数据）
+            // 更新月度图表
             const weekIndex = Math.min(3, Math.floor(new Date().getDate() / 7));
-            monthlyChart.data.datasets[0].data[weekIndex] += randomIncrement;
+            monthlyChart.data.datasets[0].data[weekIndex] += todayMinutes;
             monthlyChart.update();
+        }
+        
+        // 更新任务分布图表
+        function updateTaskDistributionChart() {
+            if (!taskDistributionChart) return;
+            
+            const taskCategories = {
+                '学习': 0,
+                '工作': 0,
+                '阅读': 0,
+                '其他': 0
+            };
+            
+            tasks.forEach(task => {
+                const name = task.name.toLowerCase();
+                if (name.includes('单词') || name.includes('学习') || name.includes('课程')) {
+                    taskCategories['学习'] += 1;
+                } else if (name.includes('工作') || name.includes('项目') || name.includes('代码')) {
+                    taskCategories['工作'] += 1;
+                } else if (name.includes('阅读') || name.includes('书') || name.includes('文章')) {
+                    taskCategories['阅读'] += 1;
+                } else {
+                    taskCategories['其他'] += 1;
+                }
+            });
+            
+            taskDistributionChart.data.datasets[0].data = [
+                taskCategories['学习'] * 25,
+                taskCategories['工作'] * 25,
+                taskCategories['阅读'] * 25,
+                taskCategories['其他'] * 25
+            ];
+            
+            taskDistributionChart.update();
+        }
+        
+        // 更新UI状态
+        function updateUIState() {
+            // 更新音量图标
+            if (volumeIcon) updateVolumeIcon();
+            
+            // 更新播放状态
+            updateNowPlayingStatus();
         }
         
         // 页面卸载前清理

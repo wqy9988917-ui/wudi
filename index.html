@@ -6,10 +6,8 @@
     <title>时间管理与专注力工具</title>
     <!-- 引入Chart.js用于图表 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 引入Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -23,6 +21,7 @@
             color: #333;
             min-height: 100vh;
             padding: 20px;
+            transition: all 0.3s ease;
         }
         
         .container {
@@ -39,6 +38,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .logo {
@@ -84,15 +89,27 @@
         .login-panel {
             background-color: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            padding: 30px;
+            padding: 40px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             margin-bottom: 25px;
             text-align: center;
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .login-panel h2 {
             color: #2575fc;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .login-panel p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
         }
         
         .login-form {
@@ -100,18 +117,20 @@
             gap: 10px;
             justify-content: center;
             align-items: center;
+            max-width: 500px;
+            margin: 0 auto;
         }
         
-        input[type="text"] {
+        input[type="text"], input[type="number"], select {
             padding: 12px 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
-            width: 250px;
+            width: 100%;
             transition: border-color 0.3s;
         }
         
-        input[type="text"]:focus {
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
             border-color: #6a11cb;
             outline: none;
         }
@@ -125,12 +144,16 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s;
         }
         
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
         }
         
         .main-content {
@@ -138,6 +161,12 @@
             grid-template-columns: 1fr 1fr;
             gap: 25px;
             margin-bottom: 25px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .card {
@@ -145,6 +174,11 @@
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
         }
         
         .card h2 {
@@ -152,6 +186,13 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: #6a11cb;
         }
         
         .task-item {
@@ -163,6 +204,11 @@
             background-color: #f8f9ff;
             border-radius: 10px;
             border-left: 5px solid #6a11cb;
+            transition: all 0.3s;
+        }
+        
+        .task-item:hover {
+            background-color: #edf1ff;
         }
         
         .task-info h3 {
@@ -175,6 +221,25 @@
             font-size: 14px;
         }
         
+        .task-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .task-tag.countdown {
+            background-color: #e1f5fe;
+            color: #0288d1;
+        }
+        
+        .task-tag.stopwatch {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
         .timer-controls {
             display: flex;
             gap: 10px;
@@ -184,13 +249,14 @@
             padding: 8px 15px;
             border-radius: 6px;
             font-size: 14px;
+            min-width: 70px;
         }
         
         .timer-btn.start {
             background: linear-gradient(to right, #4CAF50, #8BC34A);
         }
         
-        .timer-btn.stop {
+        .timer-btn.delete {
             background: linear-gradient(to right, #f44336, #FF9800);
         }
         
@@ -198,6 +264,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            margin-top: 25px;
         }
         
         .form-row {
@@ -216,18 +283,9 @@
             font-weight: 500;
         }
         
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            background-color: white;
-        }
-        
         .focus-timer {
             text-align: center;
-            padding: 30px;
+            padding: 25px;
         }
         
         .timer-display {
@@ -236,6 +294,7 @@
             color: #2575fc;
             margin: 20px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'Courier New', monospace;
         }
         
         .timer-presets {
@@ -243,6 +302,7 @@
             justify-content: center;
             gap: 15px;
             margin: 25px 0;
+            flex-wrap: wrap;
         }
         
         .preset-btn {
@@ -272,13 +332,24 @@
         .timer-control {
             font-size: 18px;
             padding: 15px 40px;
+            margin: 10px;
+        }
+        
+        .timer-control.stop {
+            background: linear-gradient(to right, #f44336, #FF9800);
+        }
+        
+        .white-noise-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
         
         .white-noise {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .noise-option {
@@ -312,6 +383,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 25px;
             margin-bottom: 25px;
+            animation: fadeInUp 1s ease;
         }
         
         .chart-card {
@@ -327,7 +399,7 @@
         }
         
         .hidden {
-            display: none;
+            display: none !important;
         }
         
         footer {
@@ -336,6 +408,41 @@
             padding: 20px;
             font-size: 14px;
             opacity: 0.8;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            animation: slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
         }
         
         @media (max-width: 992px) {
@@ -359,8 +466,22 @@
                 flex-direction: column;
             }
             
-            input[type="text"] {
+            .timer-display {
+                font-size: 60px;
+            }
+            
+            .timer-presets {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .preset-btn {
                 width: 100%;
+                max-width: 250px;
+            }
+            
+            .white-noise {
+                flex-direction: column;
             }
         }
     </style>
@@ -369,7 +490,7 @@
     <div class="container">
         <header>
             <div class="logo">
-                <div class="logo-icon">⏳</div>
+                <div class="logo-icon"><i class="fas fa-clock"></i></div>
                 <h1>时间管理与专注力工具</h1>
             </div>
             <div class="user-section">
@@ -384,23 +505,30 @@
         </header>
         
         <div id="loginPanel" class="login-panel">
-            <h2>欢迎使用时间管理工具</h2>
-            <p>请输入您的名字开始专注时间管理</p>
+            <h2><i class="fas fa-user-circle"></i> 欢迎使用时间管理工具</h2>
+            <p>请输入您的名字开始专注时间管理，提升工作效率</p>
             <div class="login-form">
                 <input type="text" id="usernameInput" placeholder="请输入您的名字" required>
-                <button id="loginBtn">开始使用</button>
+                <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> 开始使用</button>
+            </div>
+            <div style="margin-top: 30px; color: #666; font-size: 14px;">
+                <p><i class="fas fa-info-circle"></i> 提示：这是一个演示版本，专注记录仅保存在当前浏览器中</p>
             </div>
         </div>
         
         <div id="mainApp" class="hidden">
             <div class="main-content">
                 <div class="card">
-                    <h2>任务清单</h2>
+                    <h2><i class="fas fa-tasks"></i> 任务清单</h2>
                     <div id="taskList">
                         <!-- 任务将通过JS动态添加 -->
+                        <div class="empty-state" id="emptyTaskState">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>暂无任务，请添加您的第一个专注任务</p>
+                        </div>
                     </div>
                     
-                    <h3 style="margin-top: 30px;">添加新任务</h3>
+                    <h3 style="margin-top: 30px;"><i class="fas fa-plus-circle"></i> 添加新任务</h3>
                     <form class="add-task-form" id="addTaskForm">
                         <div class="form-row">
                             <div class="form-group">
@@ -421,31 +549,33 @@
                                 <input type="number" id="taskDuration" min="1" max="180" value="25" required>
                             </div>
                         </div>
-                        <button type="submit">添加任务</button>
+                        <button type="submit"><i class="fas fa-plus"></i> 添加任务</button>
                     </form>
                 </div>
                 
                 <div class="card focus-timer">
-                    <h2>专注计时器</h2>
+                    <h2><i class="fas fa-hourglass-half"></i> 专注计时器</h2>
                     <div class="timer-display" id="timerDisplay">25:00</div>
                     
                     <div class="timer-presets">
-                        <button class="preset-btn active" data-minutes="25">番茄钟 (25分钟)</button>
-                        <button class="preset-btn" data-minutes="15">短时专注 (15分钟)</button>
-                        <button class="preset-btn" data-minutes="45">深度工作 (45分钟)</button>
+                        <button class="preset-btn active" data-minutes="25"><i class="fas fa-apple-alt"></i> 番茄钟 (25分钟)</button>
+                        <button class="preset-btn" data-minutes="15"><i class="fas fa-coffee"></i> 短时专注 (15分钟)</button>
+                        <button class="preset-btn" data-minutes="45"><i class="fas fa-brain"></i> 深度工作 (45分钟)</button>
                     </div>
                     
                     <div class="custom-time">
-                        <span>自定义时长：</span>
+                        <span><i class="fas fa-cog"></i> 自定义时长：</span>
                         <input type="number" id="customMinutes" min="1" max="180" value="25">
                         <span>分钟</span>
                     </div>
                     
-                    <button class="timer-control" id="startTimerBtn">开始专注</button>
-                    <button class="timer-control stop" id="stopTimerBtn" style="display: none;">结束专注</button>
+                    <div>
+                        <button class="timer-control" id="startTimerBtn"><i class="fas fa-play"></i> 开始专注</button>
+                        <button class="timer-control stop" id="stopTimerBtn"><i class="fas fa-stop"></i> 结束专注</button>
+                    </div>
                     
-                    <div style="margin-top: 30px;">
-                        <h3>白噪音</h3>
+                    <div class="white-noise-section">
+                        <h3><i class="fas fa-volume-up"></i> 白噪音</h3>
                         <p style="margin-bottom: 15px; color: #666;">选择背景音提升专注力</p>
                         <div class="white-noise">
                             <div class="noise-option" data-sound="rain">
@@ -471,28 +601,28 @@
             
             <div class="charts-container">
                 <div class="chart-card">
-                    <h2>今日专注时长</h2>
+                    <h2><i class="fas fa-chart-pie"></i> 今日专注时长</h2>
                     <div class="chart-container">
                         <canvas id="dailyChart"></canvas>
                     </div>
                 </div>
                 
                 <div class="chart-card">
-                    <h2>本周专注趋势</h2>
+                    <h2><i class="fas fa-chart-bar"></i> 本周专注趋势</h2>
                     <div class="chart-container">
                         <canvas id="weeklyChart"></canvas>
                     </div>
                 </div>
                 
                 <div class="chart-card">
-                    <h2>月度专注统计</h2>
+                    <h2><i class="fas fa-chart-line"></i> 月度专注统计</h2>
                     <div class="chart-container">
                         <canvas id="monthlyChart"></canvas>
                     </div>
                 </div>
                 
                 <div class="chart-card">
-                    <h2>任务分布</h2>
+                    <h2><i class="fas fa-project-diagram"></i> 任务分布</h2>
                     <div class="chart-container">
                         <canvas id="taskDistributionChart"></canvas>
                     </div>
@@ -501,23 +631,14 @@
         </div>
         
         <footer>
-            <p>时间管理与专注力工具 &copy; 2023 | 使用Firebase实时数据库保存您的专注记录</p>
-            <p style="font-size: 12px; margin-top: 5px;">注意：这是一个演示版本，请替换Firebase配置以启用数据保存功能</p>
+            <p>时间管理与专注力工具 &copy; 2023 | 专注于提升您的工作效率</p>
+            <p style="font-size: 12px; margin-top: 5px;">使用本地存储保存您的专注记录 | 如需云端同步请配置Firebase</p>
         </footer>
     </div>
 
+    <div id="notification" class="notification hidden"></div>
+
     <script>
-        // Firebase配置（请替换为您的配置）
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY_HERE",
-            authDomain: "YOUR_AUTH_DOMAIN_HERE",
-            databaseURL: "YOUR_DATABASE_URL_HERE",
-            projectId: "YOUR_PROJECT_ID_HERE",
-            storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
-            appId: "YOUR_APP_ID_HERE"
-        };
-        
         // 初始化变量
         let currentUser = null;
         let tasks = [];
@@ -525,8 +646,27 @@
         let timerSeconds = 25 * 60;
         let timerRunning = false;
         let selectedSound = null;
-        let audioContext = null;
-        let audioBuffers = {};
+        let focusSessions = [];
+        
+        // 从本地存储加载数据
+        function loadFromLocalStorage() {
+            const savedTasks = localStorage.getItem('focusTasks');
+            const savedSessions = localStorage.getItem('focusSessions');
+            
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+            }
+            
+            if (savedSessions) {
+                focusSessions = JSON.parse(savedSessions);
+            }
+        }
+        
+        // 保存数据到本地存储
+        function saveToLocalStorage() {
+            localStorage.setItem('focusTasks', JSON.stringify(tasks));
+            localStorage.setItem('focusSessions', JSON.stringify(focusSessions));
+        }
         
         // DOM元素
         const loginPanel = document.getElementById('loginPanel');
@@ -538,6 +678,7 @@
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const taskList = document.getElementById('taskList');
+        const emptyTaskState = document.getElementById('emptyTaskState');
         const addTaskForm = document.getElementById('addTaskForm');
         const timerDisplay = document.getElementById('timerDisplay');
         const startTimerBtn = document.getElementById('startTimerBtn');
@@ -545,17 +686,21 @@
         const presetButtons = document.querySelectorAll('.preset-btn');
         const customMinutes = document.getElementById('customMinutes');
         const noiseOptions = document.querySelectorAll('.noise-option');
+        const notification = document.getElementById('notification');
         
         // 图表变量
         let dailyChart, weeklyChart, monthlyChart, taskDistributionChart;
         
         // 初始化应用
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化示例数据
-            initializeSampleData();
+            // 从本地存储加载数据
+            loadFromLocalStorage();
             
             // 初始化图表
             initializeCharts();
+            
+            // 更新UI状态
+            updateUIState();
             
             // 事件监听
             loginBtn.addEventListener('click', handleLogin);
@@ -582,98 +727,117 @@
                     noiseOptions.forEach(o => o.classList.remove('active'));
                     this.classList.add('active');
                     selectedSound = this.getAttribute('data-sound');
-                    // 在实际应用中，这里会播放对应的白噪音
-                    console.log(`选择了白噪音: ${selectedSound}`);
+                    showNotification(`已切换白噪音: ${this.querySelector('div:last-child').textContent}`);
                 });
             });
             
-            // 模拟登录
-            simulateLogin();
+            // 设置默认白噪音
+            noiseOptions[0].classList.add('active');
+            selectedSound = noiseOptions[0].getAttribute('data-sound');
+            
+            // 初始更新计时器显示
+            updateTimerDisplay();
+            
+            // 渲染任务列表
+            renderTaskList();
         });
         
-        // 初始化示例数据
-        function initializeSampleData() {
-            tasks = [
-                { id: 1, name: '背一百个单词', type: 'countdown', duration: 25, completed: true },
-                { id: 2, name: '阅读技术文档', type: 'countdown', duration: 45, completed: false },
-                { id: 3, name: '编写项目代码', type: 'stopwatch', duration: 60, completed: false },
-                { id: 4, name: '学习新框架', type: 'countdown', duration: 30, completed: true }
-            ];
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = 'notification';
             
-            renderTaskList();
-        }
-        
-        // 模拟登录（演示用）
-        function simulateLogin() {
+            // 设置通知颜色
+            if (type === 'success') {
+                notification.style.backgroundColor = '#4CAF50';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = '#f44336';
+            } else {
+                notification.style.backgroundColor = '#2196F3';
+            }
+            
+            // 显示通知
+            notification.classList.remove('hidden');
+            
+            // 3秒后隐藏
             setTimeout(() => {
-                handleLogin();
-            }, 500);
+                notification.classList.add('hidden');
+            }, 3000);
         }
         
         // 处理登录
         function handleLogin() {
             const username = usernameInput.value.trim();
             if (!username) {
-                alert('请输入您的名字');
+                showNotification('请输入您的名字', 'error');
+                usernameInput.focus();
                 return;
             }
             
             currentUser = {
                 name: username,
-                id: 'demo-user-' + Date.now()
+                id: 'user-' + Date.now()
             };
             
             // 更新UI
             userName.textContent = currentUser.name;
             userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
-            userInfo.classList.remove('hidden');
+            
+            // 切换显示
             loginPanel.classList.add('hidden');
             mainApp.classList.remove('hidden');
+            userInfo.classList.remove('hidden');
             
-            // 在实际应用中，这里会初始化Firebase
-            console.log(`用户 ${currentUser.name} 已登录`);
+            // 显示欢迎消息
+            showNotification(`欢迎回来，${currentUser.name}！`, 'success');
             
-            // 模拟从Firebase加载数据
-            loadUserData();
+            // 更新图表数据
+            updateCharts();
         }
         
         // 处理退出登录
         function handleLogout() {
-            currentUser = null;
-            userInfo.classList.add('hidden');
-            loginPanel.classList.remove('hidden');
-            mainApp.classList.add('hidden');
-            
             // 停止计时器
             stopTimer();
+            
+            // 重置状态
+            currentUser = null;
+            
+            // 切换显示
+            loginPanel.classList.remove('hidden');
+            mainApp.classList.add('hidden');
+            userInfo.classList.add('hidden');
             
             // 重置用户名输入
             usernameInput.value = '';
             
-            console.log('用户已退出登录');
-        }
-        
-        // 加载用户数据（模拟）
-        function loadUserData() {
-            console.log('正在加载用户数据...');
-            // 在实际应用中，这里会从Firebase加载用户的任务和专注记录
+            showNotification('您已退出登录', 'info');
         }
         
         // 渲染任务列表
         function renderTaskList() {
             taskList.innerHTML = '';
             
+            if (tasks.length === 0) {
+                emptyTaskState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyTaskState.classList.add('hidden');
+            
             tasks.forEach(task => {
                 const taskElement = document.createElement('div');
                 taskElement.className = 'task-item';
                 taskElement.innerHTML = `
                     <div class="task-info">
-                        <h3>${task.name}</h3>
-                        <p>${task.type === 'countdown' ? '倒计时' : '正计时'} - ${task.duration}分钟</p>
+                        <h3>${task.name} 
+                            <span class="task-tag ${task.type}">${task.type === 'countdown' ? '倒计时' : '正计时'}</span>
+                        </h3>
+                        <p><i class="far fa-clock"></i> ${task.duration}分钟 | 创建于：${formatDate(task.createdAt)}</p>
                     </div>
                     <div class="timer-controls">
-                        <button class="timer-btn start" data-id="${task.id}">开始</button>
-                        <button class="timer-btn stop" data-id="${task.id}">删除</button>
+                        <button class="timer-btn start" data-id="${task.id}"><i class="fas fa-play"></i> 开始</button>
+                        <button class="timer-btn delete" data-id="${task.id}"><i class="fas fa-trash"></i> 删除</button>
                     </div>
                 `;
                 
@@ -688,12 +852,18 @@
                 });
             });
             
-            document.querySelectorAll('.task-item .timer-btn.stop').forEach(btn => {
+            document.querySelectorAll('.task-item .timer-btn.delete').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const taskId = parseInt(this.getAttribute('data-id'));
                     deleteTask(taskId);
                 });
             });
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
         }
         
         // 处理添加任务
@@ -705,32 +875,38 @@
             const taskDuration = parseInt(document.getElementById('taskDuration').value);
             
             if (!taskName || !taskDuration) {
-                alert('请填写完整的任务信息');
+                showNotification('请填写完整的任务信息', 'error');
+                return;
+            }
+            
+            if (taskDuration < 1 || taskDuration > 180) {
+                showNotification('时长应在1-180分钟之间', 'error');
                 return;
             }
             
             const newTask = {
-                id: tasks.length + 1,
+                id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
                 name: taskName,
                 type: timerType,
                 duration: taskDuration,
-                completed: false
+                completed: false,
+                createdAt: new Date().toISOString()
             };
             
             tasks.push(newTask);
             
-            // 在实际应用中，这里会将任务保存到Firebase
-            saveTaskToFirebase(newTask);
+            // 保存到本地存储
+            saveToLocalStorage();
             
             // 重置表单
-            addTaskForm.reset();
+            document.getElementById('taskName').value = '';
             document.getElementById('taskDuration').value = 25;
             
             // 更新UI
             renderTaskList();
             updateTaskDistributionChart();
             
-            alert('任务添加成功！');
+            showNotification(`任务"${taskName}"添加成功！`, 'success');
         }
         
         // 开始任务计时器
@@ -742,23 +918,36 @@
             customMinutes.value = task.duration;
             updateTimerDisplay();
             
+            // 更新预设按钮
+            presetButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.getAttribute('data-minutes')) === task.duration) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            showNotification(`开始任务: ${task.name}`, 'info');
+            
             // 开始计时
             startTimer();
-            
-            // 更新预设按钮
-            presetButtons.forEach(btn => btn.classList.remove('active'));
-            
-            console.log(`开始任务: ${task.name}`);
         }
         
         // 删除任务
         function deleteTask(taskId) {
-            tasks = tasks.filter(t => t.id !== taskId);
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex === -1) return;
+            
+            const taskName = tasks[taskIndex].name;
+            tasks.splice(taskIndex, 1);
+            
+            // 保存到本地存储
+            saveToLocalStorage();
+            
+            // 更新UI
             renderTaskList();
             updateTaskDistributionChart();
             
-            // 在实际应用中，这里会从Firebase删除任务
-            console.log(`任务 ${taskId} 已删除`);
+            showNotification(`任务"${taskName}"已删除`, 'info');
         }
         
         // 更新计时器显示
@@ -775,14 +964,29 @@
         
         // 开始计时器
         function startTimer() {
-            if (timerRunning) return;
+            if (timerRunning) {
+                showNotification('计时器已经在运行中', 'info');
+                return;
+            }
             
             const minutes = parseInt(customMinutes.value) || 25;
-            timerSeconds = minutes * 60;
+            if (minutes < 1 || minutes > 180) {
+                showNotification('时长应在1-180分钟之间', 'error');
+                return;
+            }
             
+            timerSeconds = minutes * 60;
             timerRunning = true;
-            startTimerBtn.style.display = 'none';
-            stopTimerBtn.style.display = 'inline-block';
+            
+            // 更新按钮状态
+            startTimerBtn.disabled = true;
+            startTimerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 专注中...';
+            stopTimerBtn.classList.remove('hidden');
+            
+            // 更新任务列表中的按钮状态
+            document.querySelectorAll('.timer-btn.start').forEach(btn => {
+                btn.disabled = true;
+            });
             
             currentTimer = setInterval(() => {
                 timerSeconds--;
@@ -793,16 +997,41 @@
                 timerDisplay.textContent = 
                     `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
                 
+                // 时间到
                 if (timerSeconds <= 0) {
                     stopTimer();
-                    alert('专注时间结束！');
+                    showNotification('专注时间结束！休息一下吧', 'success');
                     
                     // 保存专注记录
-                    saveFocusSession(minutes);
+                    const minutesElapsed = minutes;
+                    saveFocusSession(minutesElapsed);
+                    
+                    // 播放提示音
+                    playTimerEndSound();
                 }
             }, 1000);
             
-            console.log(`计时器开始: ${minutes}分钟`);
+            showNotification(`专注计时开始: ${minutes}分钟`, 'info');
+        }
+        
+        // 播放计时结束提示音
+        function playTimerEndSound() {
+            // 创建音频上下文
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 1);
         }
         
         // 停止计时器
@@ -811,30 +1040,44 @@
             
             timerRunning = false;
             clearInterval(currentTimer);
-            startTimerBtn.style.display = 'inline-block';
-            stopTimerBtn.style.display = 'none';
+            
+            // 更新按钮状态
+            startTimerBtn.disabled = false;
+            startTimerBtn.innerHTML = '<i class="fas fa-play"></i> 开始专注';
+            stopTimerBtn.classList.add('hidden');
+            
+            // 更新任务列表中的按钮状态
+            document.querySelectorAll('.timer-btn.start').forEach(btn => {
+                btn.disabled = false;
+            });
             
             // 保存专注记录（如果计时超过1分钟）
-            const minutesElapsed = (parseInt(customMinutes.value) || 25) - Math.ceil(timerSeconds / 60);
+            const minutes = parseInt(customMinutes.value) || 25;
+            const minutesElapsed = minutes - Math.ceil(timerSeconds / 60);
             if (minutesElapsed > 0) {
                 saveFocusSession(minutesElapsed);
+                showNotification(`专注完成: ${minutesElapsed}分钟`, 'success');
+            } else {
+                showNotification('专注已取消', 'info');
             }
-            
-            console.log('计时器已停止');
         }
         
-        // 保存专注会话（模拟）
+        // 保存专注会话
         function saveFocusSession(minutes) {
-            console.log(`保存专注会话: ${minutes}分钟`);
+            const session = {
+                id: Date.now(),
+                minutes: minutes,
+                date: new Date().toISOString(),
+                task: document.getElementById('taskName').value || '自定义专注'
+            };
             
-            // 在实际应用中，这里会将数据保存到Firebase
-            // 然后更新图表
+            focusSessions.push(session);
+            
+            // 保存到本地存储
+            saveToLocalStorage();
+            
+            // 更新图表
             updateCharts();
-        }
-        
-        // 保存任务到Firebase（模拟）
-        function saveTaskToFirebase(task) {
-            console.log(`保存任务到Firebase: ${task.name}`);
         }
         
         // 初始化图表
@@ -846,7 +1089,7 @@
                 data: {
                     labels: ['已完成', '剩余'],
                     datasets: [{
-                        data: [125, 55],
+                        data: [85, 65],
                         backgroundColor: [
                             '#6a11cb',
                             '#2575fc'
@@ -860,6 +1103,13 @@
                     plugins: {
                         legend: {
                             position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '分钟';
+                                }
+                            }
                         }
                     }
                 }
@@ -956,12 +1206,23 @@
         
         // 更新图表
         function updateCharts() {
-            // 模拟数据更新
-            const randomIncrement = Math.floor(Math.random() * 30) + 10;
+            // 如果有专注记录，使用实际数据
+            if (focusSessions.length > 0) {
+                // 计算今日数据
+                const today = new Date().toDateString();
+                const todaySessions = focusSessions.filter(s => new Date(s.date).toDateString() === today);
+                const todayMinutes = todaySessions.reduce((sum, s) => sum + s.minutes, 0);
+                
+                // 更新每日图表
+                dailyChart.data.datasets[0].data = [todayMinutes, Math.max(0, 150 - todayMinutes)];
+                dailyChart.update();
+                
+                // 更新任务分布图表
+                updateTaskDistributionChart();
+            }
             
-            // 更新每日图表
-            dailyChart.data.datasets[0].data[0] += randomIncrement;
-            dailyChart.update();
+            // 模拟一些数据变化
+            const randomIncrement = Math.floor(Math.random() * 20) + 5;
             
             // 更新每周图表（模拟今天的数据）
             const todayIndex = new Date().getDay() - 1;
@@ -974,27 +1235,45 @@
             const weekIndex = Math.min(3, Math.floor(new Date().getDate() / 7));
             monthlyChart.data.datasets[0].data[weekIndex] += randomIncrement;
             monthlyChart.update();
-            
-            console.log('图表已更新');
         }
         
         // 更新任务分布图表
         function updateTaskDistributionChart() {
-            // 模拟更新任务分布
-            taskDistributionChart.data.datasets[0].data[0] = tasks.length * 10;
+            // 根据实际任务更新分布
+            const taskCategories = {
+                '学习': 0,
+                '工作': 0,
+                '阅读': 0,
+                '其他': 0
+            };
+            
+            tasks.forEach(task => {
+                const name = task.name.toLowerCase();
+                if (name.includes('单词') || name.includes('学习') || name.includes('课程')) {
+                    taskCategories['学习'] += 1;
+                } else if (name.includes('工作') || name.includes('项目') || name.includes('代码')) {
+                    taskCategories['工作'] += 1;
+                } else if (name.includes('阅读') || name.includes('书') || name.includes('文章')) {
+                    taskCategories['阅读'] += 1;
+                } else {
+                    taskCategories['其他'] += 1;
+                }
+            });
+            
+            taskDistributionChart.data.datasets[0].data = [
+                taskCategories['学习'] * 25,
+                taskCategories['工作'] * 25,
+                taskCategories['阅读'] * 25,
+                taskCategories['其他'] * 25
+            ];
+            
             taskDistributionChart.update();
         }
         
-        // 模拟Firebase初始化
-        function initializeFirebase() {
-            // 在实际应用中，这里会初始化Firebase
-            console.log('Firebase初始化（请替换为您的配置）');
-            /*
-            // 取消注释并替换为您的Firebase配置
-            firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
-            const auth = firebase.auth();
-            */
+        // 更新UI状态
+        function updateUIState() {
+            // 初始隐藏停止按钮
+            stopTimerBtn.classList.add('hidden');
         }
     </script>
 </body>

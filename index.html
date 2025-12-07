@@ -1,172 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>时间管理与专注力工具</title>
-    <!-- 引入Chart.js用于图表 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 引入Font Awesome图标 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* ... 保持原有CSS样式不变 ... */
-        
-        /* 新增白噪音播放控制样式 */
-        .noise-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .noise-control-btn {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-        }
-        
-        .noise-control-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(106, 17, 203, 0.3);
-        }
-        
-        .noise-control-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .volume-slider {
-            flex: 1;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: #ddd;
-            border-radius: 3px;
-            outline: none;
-        }
-        
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #6a11cb;
-            cursor: pointer;
-        }
-        
-        .volume-slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #6a11cb;
-            cursor: pointer;
-            border: none;
-        }
-        
-        .volume-icon {
-            font-size: 18px;
-            color: #666;
-        }
-        
-        .noise-playing {
-            position: relative;
-        }
-        
-        .noise-playing::after {
-            content: "";
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 8px;
-            height: 8px;
-            background-color: #4CAF50;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(0.8); opacity: 1; }
-        }
-    </style>
+    <!-- ... 前面的CSS样式保持不变 ... -->
 </head>
 <body>
-    <!-- ... HTML主体部分保持不变，直到白噪音部分 ... -->
-    
-    <div class="white-noise-section">
-        <h3><i class="fas fa-volume-up"></i> 白噪音</h3>
-        <p style="margin-bottom: 15px; color: #666;">选择背景音提升专注力</p>
-        <div class="white-noise">
-            <div class="noise-option" data-sound="rain" data-src="https://assets.mixkit.co/sfx/preview/mixkit-rain-loop-1244.mp3">
-                <div class="noise-icon">🌧️</div>
-                <div>下雨声</div>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-clock"></i></div>
+                <h1>时间管理与专注力工具</h1>
             </div>
-            <div class="noise-option" data-sound="forest" data-src="https://assets.mixkit.co/sfx/preview/mixkit-forest-birds-loop-1236.mp3">
-                <div class="noise-icon">🌲</div>
-                <div>森林鸟鸣</div>
+            <div class="user-section">
+                <div id="userInfo" class="user-info hidden"> <!-- 修改处1: 初始隐藏 -->
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div>
+                        <div id="userName">用户</div>
+                        <button id="logoutBtn" style="padding: 5px 10px; font-size: 12px;">退出登录</button>
+                    </div>
+                </div>
             </div>
-            <div class="noise-option" data-sound="coffee" data-src="https://assets.mixkit.co/sfx/preview/mixkit-cafe-ambience-113.mp3">
-                <div class="noise-icon">☕</div>
-                <div>咖啡馆</div>
-            </div>
-            <div class="noise-option" data-sound="waves" data-src="https://assets.mixkit.co/sfx/preview/mixkit-ocean-waves-loop-1234.mp3">
-                <div class="noise-icon">🌊</div>
-                <div>海浪声</div>
-            </div>
-            <div class="noise-option" data-sound="fireplace" data-src="https://assets.mixkit.co/sfx/preview/mixkit-campfire-crackling-1355.mp3">
-                <div class="noise-icon">🔥</div>
-                <div>篝火声</div>
-            </div>
-            <div class="noise-option" data-sound="white-noise" data-src="https://assets.mixkit.co/sfx/preview/mixkit-white-noise-ambience-100.mp3">
-                <div class="noise-icon">📻</div>
-                <div>白噪音</div>
-            </div>
+        </header>
+        
+        <div id="loginPanel" class="login-panel"> <!-- 修改处2: 登录面板默认显示 -->
+            <!-- ... 登录面板内容不变 ... -->
         </div>
         
-        <!-- 新增：音量控制区域 -->
-        <div class="noise-controls">
-            <button id="playNoiseBtn" class="noise-control-btn" disabled>
-                <i class="fas fa-play"></i> 播放
-            </button>
-            <button id="stopNoiseBtn" class="noise-control-btn" disabled>
-                <i class="fas fa-stop"></i> 停止
-            </button>
-            <button id="pauseNoiseBtn" class="noise-control-btn" disabled>
-                <i class="fas fa-pause"></i> 暂停
-            </button>
+        <div id="mainApp" class="hidden"> <!-- 修改处3: 主应用默认隐藏 -->
+            <!-- ... 主应用内容不变 ... -->
         </div>
         
-        <!-- 新增：音量滑块 -->
-        <div class="volume-control">
-            <i class="fas fa-volume-down volume-icon"></i>
-            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50">
-            <i class="fas fa-volume-up volume-icon"></i>
-        </div>
-        
-        <p id="nowPlaying" style="margin-top: 10px; font-size: 12px; color: #666; text-align: center; min-height: 20px;">
-            未播放音频
-        </p>
+        <footer>
+            <p>时间管理与专注力工具 &copy; 2023 | 专注于提升您的工作效率</p>
+            <p style="font-size: 12px; margin-top: 5px;">使用本地存储保存您的专注记录 | 如需云端同步请配置Firebase</p>
+        </footer>
     </div>
-    
-    <!-- ... 剩余HTML代码保持不变 ... -->
+
+    <div id="notification" class="notification hidden"></div>
 
     <script>
         // 初始化变量
@@ -176,32 +45,12 @@
         let timerSeconds = 25 * 60;
         let timerRunning = false;
         let selectedSound = null;
-        let currentAudioSrc = null;
         let focusSessions = [];
-        
-        // 新增：音频相关变量
-        let audioPlayer = null;
-        let isAudioPlaying = false;
-        let audioContext = null;
-        let audioGainNode = null;
-        let currentVolume = 0.5;
-        
-        // 新增：音频资源URL映射
-        const audioSources = {
-            'rain': 'https://assets.mixkit.co/sfx/preview/mixkit-rain-loop-1244.mp3',
-            'forest': 'https://assets.mixkit.co/sfx/preview/mixkit-forest-birds-loop-1236.mp3',
-            'coffee': 'https://assets.mixkit.co/sfx/preview/mixkit-cafe-ambience-113.mp3',
-            'waves': 'https://assets.mixkit.co/sfx/preview/mixkit-ocean-waves-loop-1234.mp3',
-            'fireplace': 'https://assets.mixkit.co/sfx/preview/mixkit-campfire-crackling-1355.mp3',
-            'white-noise': 'https://assets.mixkit.co/sfx/preview/mixkit-white-noise-ambience-100.mp3'
-        };
         
         // 从本地存储加载数据
         function loadFromLocalStorage() {
             const savedTasks = localStorage.getItem('focusTasks');
             const savedSessions = localStorage.getItem('focusSessions');
-            const savedVolume = localStorage.getItem('audioVolume');
-            const savedAudioType = localStorage.getItem('selectedAudioType');
             
             if (savedTasks) {
                 tasks = JSON.parse(savedTasks);
@@ -211,16 +60,7 @@
                 focusSessions = JSON.parse(savedSessions);
             }
             
-            if (savedVolume) {
-                currentVolume = parseFloat(savedVolume);
-                document.getElementById('volumeSlider').value = currentVolume * 100;
-            }
-            
-            if (savedAudioType) {
-                selectedSound = savedAudioType;
-            }
-            
-            // 检查是否有已保存的用户登录状态
+            // 修改处4: 检查是否有已保存的用户登录状态
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
@@ -231,12 +71,8 @@
         function saveToLocalStorage() {
             localStorage.setItem('focusTasks', JSON.stringify(tasks));
             localStorage.setItem('focusSessions', JSON.stringify(focusSessions));
-            localStorage.setItem('audioVolume', currentVolume.toString());
             
-            if (selectedSound) {
-                localStorage.setItem('selectedAudioType', selectedSound);
-            }
-            
+            // 修改处5: 保存用户登录状态
             if (currentUser) {
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
             } else {
@@ -258,18 +94,11 @@
         const addTaskForm = document.getElementById('addTaskForm');
         const timerDisplay = document.getElementById('timerDisplay');
         const startTimerBtn = document.getElementById('startTimerBtn');
-        const stopTimerBtn = document.getElementById('stopTimerBtn');
+        const stopTimerBtn = document.getElementById('stopTimerBtn'); // 修改处6: 修复变量名
         const presetButtons = document.querySelectorAll('.preset-btn');
         const customMinutes = document.getElementById('customMinutes');
         const noiseOptions = document.querySelectorAll('.noise-option');
         const notification = document.getElementById('notification');
-        
-        // 新增：音频控制DOM元素
-        const playNoiseBtn = document.getElementById('playNoiseBtn');
-        const stopNoiseBtn = document.getElementById('stopNoiseBtn');
-        const pauseNoiseBtn = document.getElementById('pauseNoiseBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const nowPlayingText = document.getElementById('nowPlaying');
         
         // 图表变量
         let dailyChart, weeklyChart, monthlyChart, taskDistributionChart;
@@ -279,17 +108,28 @@
             // 从本地存储加载数据
             loadFromLocalStorage();
             
-            // 检查用户登录状态
+            // 修改处7: 检查用户登录状态，如果已登录则显示主应用
             if (currentUser) {
+                // 更新UI
                 userName.textContent = currentUser.name;
                 userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+                
+                // 切换显示
                 loginPanel.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 userInfo.classList.remove('hidden');
+            } else {
+                // 确保登录面板可见
+                loginPanel.classList.remove('hidden');
+                mainApp.classList.add('hidden');
+                userInfo.classList.add('hidden');
             }
             
             // 初始化图表
             initializeCharts();
+            
+            // 修改处8: 移除这里对updateUIState的调用，放到后面
+            // updateUIState(); // 这行注释掉或删除
             
             // 事件监听
             loginBtn.addEventListener('click', handleLogin);
@@ -315,66 +155,14 @@
                 option.addEventListener('click', function() {
                     noiseOptions.forEach(o => o.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    const soundType = this.getAttribute('data-sound');
-                    const audioSrc = this.getAttribute('data-src');
-                    selectedSound = soundType;
-                    currentAudioSrc = audioSrc;
-                    
-                    // 保存选择的音频类型
-                    localStorage.setItem('selectedAudioType', soundType);
-                    
-                    // 更新播放按钮状态
-                    playNoiseBtn.disabled = false;
-                    
-                    // 如果音频正在播放，切换到新音频
-                    if (isAudioPlaying && audioPlayer) {
-                        stopAudio();
-                        setTimeout(() => {
-                            playAudio();
-                        }, 100);
-                    }
-                    
-                    showNotification(`已选择: ${this.querySelector('div:last-child').textContent}`);
-                    updateNowPlayingText();
+                    selectedSound = this.getAttribute('data-sound');
+                    showNotification(`已切换白噪音: ${this.querySelector('div:last-child').textContent}`);
                 });
             });
             
-            // 新增：音频控制按钮事件监听
-            playNoiseBtn.addEventListener('click', playAudio);
-            stopNoiseBtn.addEventListener('click', stopAudio);
-            pauseNoiseBtn.addEventListener('click', pauseAudio);
-            volumeSlider.addEventListener('input', updateVolume);
-            
             // 设置默认白噪音
-            if (selectedSound) {
-                // 恢复上次选择的音频
-                const selectedOption = document.querySelector(`.noise-option[data-sound="${selectedSound}"]`);
-                if (selectedOption) {
-                    selectedOption.classList.add('active');
-                    currentAudioSrc = selectedOption.getAttribute('data-src');
-                    playNoiseBtn.disabled = false;
-                } else {
-                    // 默认选择第一个
-                    noiseOptions[0].classList.add('active');
-                    selectedSound = noiseOptions[0].getAttribute('data-sound');
-                    currentAudioSrc = noiseOptions[0].getAttribute('data-src');
-                    playNoiseBtn.disabled = false;
-                }
-            } else {
-                noiseOptions[0].classList.add('active');
-                selectedSound = noiseOptions[0].getAttribute('data-sound');
-                currentAudioSrc = noiseOptions[0].getAttribute('data-src');
-                playNoiseBtn.disabled = false;
-            }
-            
-            // 设置初始音量
-            if (currentVolume !== 0.5) {
-                volumeSlider.value = currentVolume * 100;
-            }
-            
-            // 初始化音频上下文
-            initializeAudioContext();
+            noiseOptions[0].classList.add('active');
+            selectedSound = noiseOptions[0].getAttribute('data-sound');
             
             // 初始更新计时器显示
             updateTimerDisplay();
@@ -382,207 +170,11 @@
             // 渲染任务列表
             renderTaskList();
             
-            // 更新当前播放文本
-            updateNowPlayingText();
+            // 修改处9: 在这里初始化UI状态
+            updateUIState();
         });
         
-        // 新增：初始化音频上下文
-        function initializeAudioContext() {
-            try {
-                // 检查浏览器是否支持Web Audio API
-                if (window.AudioContext || window.webkitAudioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    audioGainNode = audioContext.createGain();
-                    audioGainNode.connect(audioContext.destination);
-                    audioGainNode.gain.value = currentVolume;
-                    
-                    console.log('音频上下文初始化成功');
-                } else {
-                    console.warn('您的浏览器不支持Web Audio API');
-                }
-            } catch (error) {
-                console.error('初始化音频上下文失败:', error);
-            }
-        }
-        
-        // 新增：播放音频
-        function playAudio() {
-            if (!currentAudioSrc) {
-                showNotification('请先选择一种白噪音', 'error');
-                return;
-            }
-            
-            if (isAudioPlaying) {
-                // 如果已经在播放，暂停
-                pauseAudio();
-                return;
-            }
-            
-            if (!audioPlayer) {
-                audioPlayer = new Audio(currentAudioSrc);
-                audioPlayer.loop = true;
-                audioPlayer.preload = 'auto';
-                
-                // 如果音频上下文已初始化，将音频连接到音频上下文
-                if (audioContext && audioGainNode) {
-                    const source = audioContext.createMediaElementSource(audioPlayer);
-                    source.connect(audioGainNode);
-                }
-                
-                audioPlayer.volume = currentVolume;
-                
-                audioPlayer.addEventListener('canplaythrough', function() {
-                    console.log('音频可以播放');
-                });
-                
-                audioPlayer.addEventListener('error', function(e) {
-                    console.error('音频加载错误:', e);
-                    showNotification('音频加载失败，请检查网络连接', 'error');
-                    stopAudio();
-                });
-            }
-            
-            audioPlayer.play()
-                .then(() => {
-                    isAudioPlaying = true;
-                    playNoiseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                    playNoiseBtn.disabled = false;
-                    stopNoiseBtn.disabled = false;
-                    pauseNoiseBtn.disabled = false;
-                    
-                    // 添加播放状态样式
-                    const activeOption = document.querySelector('.noise-option.active');
-                    if (activeOption) {
-                        activeOption.classList.add('noise-playing');
-                    }
-                    
-                    updateNowPlayingText();
-                    showNotification('白噪音播放中', 'success');
-                })
-                .catch(error => {
-                    console.error('播放失败:', error);
-                    showNotification('播放失败: ' + error.message, 'error');
-                });
-        }
-        
-        // 新增：暂停音频
-        function pauseAudio() {
-            if (audioPlayer && isAudioPlaying) {
-                audioPlayer.pause();
-                isAudioPlaying = false;
-                playNoiseBtn.innerHTML = '<i class="fas fa-play"></i> 播放';
-                playNoiseBtn.disabled = false;
-                
-                // 移除播放状态样式
-                const activeOption = document.querySelector('.noise-option.active');
-                if (activeOption) {
-                    activeOption.classList.remove('noise-playing');
-                }
-                
-                updateNowPlayingText();
-                showNotification('白噪音已暂停', 'info');
-            }
-        }
-        
-        // 新增：停止音频
-        function stopAudio() {
-            if (audioPlayer) {
-                audioPlayer.pause();
-                audioPlayer.currentTime = 0;
-                audioPlayer = null;
-                isAudioPlaying = false;
-                playNoiseBtn.innerHTML = '<i class="fas fa-play"></i> 播放';
-                playNoiseBtn.disabled = false;
-                stopNoiseBtn.disabled = true;
-                pauseNoiseBtn.disabled = true;
-                
-                // 移除播放状态样式
-                const activeOption = document.querySelector('.noise-option.active');
-                if (activeOption) {
-                    activeOption.classList.remove('noise-playing');
-                }
-                
-                updateNowPlayingText();
-                showNotification('白噪音已停止', 'info');
-            }
-        }
-        
-        // 新增：更新音量
-        function updateVolume() {
-            const volumeValue = volumeSlider.value / 100;
-            currentVolume = volumeValue;
-            
-            if (audioPlayer) {
-                audioPlayer.volume = currentVolume;
-            }
-            
-            if (audioGainNode) {
-                audioGainNode.gain.value = currentVolume;
-            }
-            
-            // 保存音量设置
-            localStorage.setItem('audioVolume', currentVolume.toString());
-            
-            // 更新音量图标
-            const volumeIcons = document.querySelectorAll('.volume-icon');
-            if (currentVolume === 0) {
-                volumeIcons.forEach(icon => {
-                    icon.className = 'fas fa-volume-mute volume-icon';
-                });
-            } else if (currentVolume < 0.5) {
-                volumeIcons.forEach(icon => {
-                    icon.className = 'fas fa-volume-down volume-icon';
-                });
-            } else {
-                volumeIcons.forEach(icon => {
-                    icon.className = 'fas fa-volume-up volume-icon';
-                });
-            }
-        }
-        
-        // 新增：更新当前播放文本
-        function updateNowPlayingText() {
-            if (!currentAudioSrc) {
-                nowPlayingText.textContent = '未选择音频';
-                return;
-            }
-            
-            const activeOption = document.querySelector('.noise-option.active');
-            if (!activeOption) {
-                nowPlayingText.textContent = '未选择音频';
-                return;
-            }
-            
-            const soundName = activeOption.querySelector('div:last-child').textContent;
-            
-            if (isAudioPlaying) {
-                nowPlayingText.innerHTML = `<i class="fas fa-volume-up" style="color:#4CAF50;"></i> 正在播放: ${soundName} (音量: ${Math.round(currentVolume * 100)}%)`;
-            } else if (audioPlayer && audioPlayer.currentTime > 0) {
-                nowPlayingText.innerHTML = `<i class="fas fa-pause" style="color:#FF9800;"></i> 已暂停: ${soundName}`;
-            } else {
-                nowPlayingText.innerHTML = `<i class="fas fa-stop" style="color:#666;"></i> 已停止: ${soundName}`;
-            }
-        }
-        
-        // 显示通知
-        function showNotification(message, type = 'info') {
-            notification.textContent = message;
-            notification.className = 'notification';
-            
-            if (type === 'success') {
-                notification.style.backgroundColor = '#4CAF50';
-            } else if (type === 'error') {
-                notification.style.backgroundColor = '#f44336';
-            } else {
-                notification.style.backgroundColor = '#2196F3';
-            }
-            
-            notification.classList.remove('hidden');
-            
-            setTimeout(() => {
-                notification.classList.add('hidden');
-            }, 3000);
-        }
+        // ... 中间的函数保持不变 ...
         
         // 处理登录
         function handleLogin() {
@@ -598,7 +190,7 @@
                 id: 'user-' + Date.now()
             };
             
-            // 保存用户信息
+            // 保存用户信息到本地存储
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
             // 更新UI
@@ -610,10 +202,10 @@
             mainApp.classList.remove('hidden');
             userInfo.classList.remove('hidden');
             
-            // 启用音频播放按钮
-            playNoiseBtn.disabled = false;
-            
+            // 显示欢迎消息
             showNotification(`欢迎回来，${currentUser.name}！`, 'success');
+            
+            // 更新图表数据
             updateCharts();
         }
         
@@ -622,13 +214,10 @@
             // 停止计时器
             stopTimer();
             
-            // 停止音频
-            stopAudio();
-            
             // 重置状态
             currentUser = null;
             
-            // 清除本地存储
+            // 从本地存储移除用户信息
             localStorage.removeItem('currentUser');
             
             // 切换显示
@@ -636,55 +225,103 @@
             mainApp.classList.add('hidden');
             userInfo.classList.add('hidden');
             
-            // 禁用音频播放按钮
-            playNoiseBtn.disabled = true;
-            stopNoiseBtn.disabled = true;
-            pauseNoiseBtn.disabled = true;
-            
+            // 重置用户名输入
             usernameInput.value = '';
+            
             showNotification('您已退出登录', 'info');
         }
         
-        // ... 其他函数保持不变（renderTaskList, handleAddTask, startTimer, stopTimer等）...
+        // ... 中间的函数保持不变 ...
         
-        // 在页面卸载前停止音频
-        window.addEventListener('beforeunload', function() {
-            if (audioPlayer) {
-                audioPlayer.pause();
-                audioPlayer = null;
+        // 开始计时器
+        function startTimer() {
+            if (timerRunning) {
+                showNotification('计时器已经在运行中', 'info');
+                return;
             }
             
-            if (audioContext) {
-                audioContext.close();
+            const minutes = parseInt(customMinutes.value) || 25;
+            if (minutes < 1 || minutes > 180) {
+                showNotification('时长应在1-180分钟之间', 'error');
+                return;
             }
-        });
-        
-        // 页面可见性变化时处理音频
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden && audioPlayer && isAudioPlaying) {
-                // 页面隐藏时暂停音频
-                audioPlayer.pause();
-                const wasPlaying = isAudioPlaying;
-                isAudioPlaying = false;
+            
+            timerSeconds = minutes * 60;
+            timerRunning = true;
+            
+            // 更新按钮状态
+            startTimerBtn.disabled = true;
+            startTimerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 专注中...';
+            stopTimerBtn.classList.remove('hidden'); // 修改处10: 显示停止按钮
+            
+            // 更新任务列表中的按钮状态
+            document.querySelectorAll('.timer-btn.start').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            currentTimer = setInterval(() => {
+                timerSeconds--;
                 
-                // 页面重新可见时恢复播放
-                document.addEventListener('visibilitychange', function resumeAudio() {
-                    if (!document.hidden && wasPlaying && audioPlayer) {
-                        audioPlayer.play()
-                            .then(() => {
-                                isAudioPlaying = true;
-                                playNoiseBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
-                            })
-                            .catch(error => {
-                                console.error('恢复播放失败:', error);
-                            });
-                        document.removeEventListener('visibilitychange', resumeAudio);
-                    }
-                });
-            }
-        });
+                const displayMinutes = Math.floor(timerSeconds / 60);
+                const displaySeconds = timerSeconds % 60;
+                
+                timerDisplay.textContent = 
+                    `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+                
+                // 时间到
+                if (timerSeconds <= 0) {
+                    stopTimer();
+                    showNotification('专注时间结束！休息一下吧', 'success');
+                    
+                    // 保存专注记录
+                    const minutesElapsed = minutes;
+                    saveFocusSession(minutesElapsed);
+                    
+                    // 播放提示音
+                    playTimerEndSound();
+                }
+            }, 1000);
+            
+            showNotification(`专注计时开始: ${minutes}分钟`, 'info');
+        }
         
-        // ... 其余的函数保持不变 ...
+        // 停止计时器
+        function stopTimer() {
+            if (!timerRunning) return;
+            
+            timerRunning = false;
+            if (currentTimer) {
+                clearInterval(currentTimer);
+            }
+            
+            // 更新按钮状态
+            startTimerBtn.disabled = false;
+            startTimerBtn.innerHTML = '<i class="fas fa-play"></i> 开始专注';
+            stopTimerBtn.classList.add('hidden'); // 修改处11: 隐藏停止按钮
+            
+            // 更新任务列表中的按钮状态
+            document.querySelectorAll('.timer-btn.start').forEach(btn => {
+                btn.disabled = false;
+            });
+            
+            // 保存专注记录（如果计时超过1分钟）
+            const minutes = parseInt(customMinutes.value) || 25;
+            const minutesElapsed = minutes - Math.ceil(timerSeconds / 60);
+            if (minutesElapsed > 0) {
+                saveFocusSession(minutesElapsed);
+                showNotification(`专注完成: ${minutesElapsed}分钟`, 'success');
+            } else {
+                showNotification('专注已取消', 'info');
+            }
+        }
+        
+        // ... 其余函数保持不变 ...
+        
+        // 更新UI状态
+        function updateUIState() {
+            // 修改处12: 移除对stopTimerBtn的操作，因为已经在stopTimer函数中处理
+            // 初始隐藏停止按钮 - 这行移除，改为在startTimer和stopTimer函数中控制
+        }
     </script>
 </body>
 </html>

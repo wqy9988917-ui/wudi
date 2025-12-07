@@ -1,70 +1,74 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>专注时间管理 PRO</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>专注时间管理</title>
 <style>
- body { font-family: 'Segoe UI', sans-serif; margin:0; padding:0; background:#eef1f7; }
- header { background:#3b5bfd; color:#fff; padding:20px; font-size:24px; text-align:center; box-shadow:0 2px 8px #0002; }
- .container { padding:20px; max-width:900px; margin:auto; }
- .card { background:white; padding:20px; border-radius:15px; box-shadow:0 4px 10px #0001; margin-bottom:20px; }
- input, button, select { padding:12px; margin:8px 0; width:100%; border-radius:10px; border:1px solid #ccc; font-size:16px; }
- button { background:#3b5bfd; color:white; border:none; cursor:pointer; transition:0.3s; }
- button:hover { background:#2e47d8; }
- .task { padding:15px; border-radius:10px; background:#f7f8fc; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
- .task button { width:auto; margin-left:5px; padding:6px 10px; font-size:14px; }
- #focusMode { position:fixed; top:0; left:0; width:100%; height:100%; background:#000c; display:none; color:#fff; text-align:center; padding-top:20%; font-size:50px; z-index:999; }
- .chart-area { display:flex; gap:20px; flex-wrap:wrap; }
- .chart-box { flex:1; min-width:280px; background:white; padding:10px; border-radius:15px; box-shadow:0 4px 10px #0001; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #0f0f1a, #1d253b);
+    color: #fff;
+  }
+  header {
+    padding: 20px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.06);
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+  }
+  input, select {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 15px;
+  }
+  button {
+    padding: 12px 22px;
+    background: #4e9cff;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover {
+    background: #1f6fe0;
+  }
+  .task-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 5px 0;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+  }
+  audio {
+    width: 100%;
+    margin-top: 10px;
+  }
 </style>
-</head>
-<body>
-<header>专注时间管理 PRO</header>
-<div class="container">
- <div class="card">
-   <h3>登录</h3>
-   <input id="username" placeholder="输入你的名字" />
-   <button id="loginBtn">登录</button>
-   <div id="userDisplay" style="margin-top:10px;font-weight:bold;font-size:18px;"></div>
- </div>
-
- <div class="card">
-   <h3>任务管理</h3>
-   <input id="taskName" placeholder="任务名称" />
-   <select id="mode">
-     <option value="countdown">倒计时</option>
-     <option value="timer">正计时</option>
-   </select>
-   <input id="duration" type="number" placeholder="时长（分钟）" />
-   <button id="addTask">添加任务</button>
-   <div id="taskList"></div>
- </div>
-
- <div class="card">
-   <h3>白噪音</h3>
-   <button onclick="playWhiteNoise()">播放白噪音</button>
-   <button onclick="stopWhiteNoise()">停止白噪音</button>
- </div>
-
- <div class="card">
-   <h3>统计图表</h3>
-   <div class="chart-area">
-     <div class="chart-box"><canvas id="chartDaily"></canvas></div>
-     <div class="chart-box"><canvas id="chartWeekly"></canvas></div>
-     <div class="chart-box"><canvas id="chartMonthly"></canvas></div>
-   </div>
- </div>
-</div>
-
-<div id="focusMode">专注中...</div>
-<audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 <script>
-// Firebase 配置
 const firebaseConfig = {
   apiKey: "AIzaSyDQkQFi2b0br4UemJP6Zhb-DckDx__pUs8",
   authDomain: "to-do-89a4f.firebaseapp.com",
@@ -75,142 +79,132 @@ const firebaseConfig = {
   appId: "1:894992095532:web:06fb10726bb2dc5c643489",
   measurementId: "G-W8BWH3WB50"
 };
-firebase.initializeApp(firebaseConfig);
+
+const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+let username = "";
+let timer = null;
+let seconds = 0;
 
-let currentUser = null;
-let charts = {}; // 保存图表对象
+function login() {
+  username = document.getElementById("username").value;
+  if (!username) return alert("请输入用户名");
+  document.getElementById("loginSection").style.display = "none";
+  document.getElementById("mainSection").style.display = "block";
+}
 
-// 登录
-document.getElementById("loginBtn").onclick = () => {
-  const name = username.value.trim();
-  if (!name) return alert("请输入名字");
-  currentUser = name;
-  userDisplay.innerText = "当前用户：" + name;
-  loadTasks();
-  loadStats();
-};
+function addTask() {
+  const name = document.getElementById("taskName").value;
+  const mode = document.getElementById("taskMode").value;
+  const minutes = document.getElementById("taskMinutes").value;
+  if (!name) return;
+  const taskId = Date.now();
+  db.ref(`users/${username}/tasks/${taskId}`).set({name, mode, minutes});
+  renderTasks();
+}
 
-// 添加任务
-document.getElementById("addTask").onclick = () => {
-  if (!currentUser) return alert("请先登录");
-  const t = taskName.value.trim();
-  const m = mode.value;
-  const d = parseInt(duration.value);
-  if (!t || !d) return alert("请填写完整信息");
-  const id = Date.now();
-  const task = { name: t, mode: m, duration: d };
-  db.ref(`tasks/${currentUser}/${id}`).set(task);
-  loadTasks();
-};
+function deleteTask(id) {
+  db.ref(`users/${username}/tasks/${id}`).remove();
+  renderTasks();
+}
 
-// 加载任务
-function loadTasks() {
-  if (!currentUser) return;
-  taskList.innerHTML = "";
-  db.ref(`tasks/${currentUser}`).once("value", snap => {
-    const tasks = snap.val() || {};
-    for (let id in tasks) {
-      const t = tasks[id];
-      const div = document.createElement("div");
-      div.className = "task";
-      div.innerHTML = `
-        <div><b>${t.name}</b> (${t.mode === 'countdown' ? '倒计时' : '正计时'} ${t.duration}分钟)</div>
+function renderTasks() {
+  const area = document.getElementById("taskList");
+  area.innerHTML = "";
+  db.ref(`users/${username}/tasks`).once("value", snap => {
+    snap.forEach(child => {
+      const t = child.val();
+      area.innerHTML += `
+      <div class='task-item'>
         <div>
-          <button onclick="startFocus('${id}', '${t.name}', '${t.mode}', ${t.duration})">开始</button>
-          <button onclick="editTask('${id}')">编辑</button>
-          <button onclick="deleteTask('${id}')">删除</button>
-        </div>`;
-      taskList.appendChild(div);
-    }
+          <strong>${t.name}</strong><br>
+          ${t.mode} - ${t.minutes} 分钟
+        </div>
+        <button onclick="startTimer(${t.minutes*60})">开始</button>
+        <button onclick="deleteTask('${child.key}')" style="background:#ff5c5c">删除</button>
+      </div>`;
+    });
   });
 }
 
-// 编辑任务
-function editTask(id) {
-  const newName = prompt("新的任务名：");
-  const newDuration = parseInt(prompt("新的时长（分钟）："));
-  if (!newName || !newDuration) return;
-  db.ref(`tasks/${currentUser}/${id}`).update({ name:newName, duration:newDuration });
-  loadTasks();
-}
-
-// 删除任务
-function deleteTask(id) {
-  if (!confirm("确定删除？")) return;
-  db.ref(`tasks/${currentUser}/${id}`).remove();
-  loadTasks();
-}
-
-// 专注模式
-function startFocus(id, name, mode, duration) {
-  focusMode.style.display = "block";
-  const start = Date.now();
-  let totalMs = duration * 60000;
-  let timer = setInterval(() => {
-    let passed = Date.now() - start;
-    if (mode === "countdown" && passed >= totalMs) {
+function startTimer(sec) {
+  seconds = sec;
+  clearInterval(timer);
+  timer = setInterval(() => {
+    seconds--;
+    document.getElementById("timerDisplay").innerText = format(seconds);
+    if (seconds <= 0) {
       clearInterval(timer);
-      endFocus(duration);
+      document.getElementById("endSound").play();
+      saveFocusRecord();
     }
   }, 1000);
-  focusMode.onclick = () => {
-    clearInterval(timer);
-    let mins = Math.round((Date.now() - start) / 60000);
-    endFocus(mins);
-  };
 }
 
-function endFocus(mins) {
-  focusMode.style.display = "none";
-  if (!currentUser) return;
-  const day = new Date().toISOString().slice(0, 10);
-  db.ref(`records/${currentUser}/${day}`).transaction(v => (v || 0) + mins);
-  document.getElementById("alarmSound").play();
-  loadStats();
-  alert("本次专注完成：" + mins + " 分钟");
+function saveFocusRecord() {
+  const day = new Date().toISOString().slice(0,10);
+  db.ref(`users/${username}/focus/${day}`).push({duration: seconds});
 }
 
-// 白噪音
-let whiteNoiseAudio;
-function playWhiteNoise() {
-  whiteNoiseAudio = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_7a3b4a18e3.mp3?filename=white-noise-ambient-110253.mp3");
-  whiteNoiseAudio.loop = true;
-  whiteNoiseAudio.play();
+function format(sec) {
+  let m = Math.floor(sec/60);
+  let s = sec%60;
+  return `${m}:${s.toString().padStart(2,'0')}`;
 }
-function stopWhiteNoise() {
-  if (whiteNoiseAudio) whiteNoiseAudio.pause();
-}
+</script>
+</head>
+<body>
+<header>🔥 专业专注时间管理系统</header>
+<div class="container">
 
-// 图表
-function drawChart(id, labels, values) {
-  if (charts[id]) charts[id].destroy();
-  charts[id] = new Chart(document.getElementById(id), {
-    type: "bar",
-    data: { labels, datasets:[{ label:"专注时长(分钟)", data: values }] },
-  });
-}
+<div id="loginSection" class="card">
+  <h2>登录</h2>
+  <input id="username" placeholder="请输入用户名">
+  <button onclick="login()">进入系统</button>
+</div>
 
-function loadStats() {
-  if (!currentUser) return;
-  db.ref(`records/${currentUser}`).once("value", snap => {
-    const data = snap.val() || {};
-    const days = Object.keys(data);
-    const values = Object.values(data);
+<div id="mainSection" style="display:none;">
+  <div class="card">
+    <h2>添加任务</h2>
+    <input id="taskName" placeholder="任务名称">
+    <select id="taskMode">
+      <option value="倒计时">倒计时</option>
+      <option value="正计时">正计时</option>
+    </select>
+    <input id="taskMinutes" type="number" placeholder="分钟数">
+    <button onclick="addTask()">添加</button>
+  </div>
 
-    // 日
-    drawChart("chartDaily", days, values);
+  <div class="card">
+    <h2>任务列表</h2>
+    <div id="taskList"></div>
+  </div>
 
-    // 周
-    let weekLabels = days.slice(-7);
-    let weekValues = values.slice(-7);
-    drawChart("chartWeekly", weekLabels, weekValues);
+  <div class="card" style="text-align:center;">
+    <h2>计时器</h2>
+    <h1 id="timerDisplay">0:00</h1>
+  </div>
 
-    // 月
-    let monthLabels = days.slice(-30);
-    let monthValues = values.slice(-30);
-    drawChart("chartMonthly", monthLabels, monthValues);
-  });
+  <div class="card">
+    <h2>白噪音中心</h2>
+    <select id="noiseSelect" onchange="changeNoise()">
+      <option value="rain.mp3">雨声</option>
+      <option value="forest.mp3">森林</option>
+      <option value="waves.mp3">海浪</option>
+      <option value="wind.mp3">风声</option>
+      <option value="cafe.mp3">咖啡店环境</option>
+    </select>
+    <audio id="noisePlayer" controls loop></audio>
+  </div>
+</div>
+</div>
+<audio id="endSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<script>
+function changeNoise(){
+  const n = document.getElementById("noiseSelect").value;
+  const p = document.getElementById("noisePlayer");
+  p.src = n;
+  p.play();
 }
 </script>
 </body>

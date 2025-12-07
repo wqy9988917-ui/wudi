@@ -1,167 +1,48 @@
-<!doctype html>
-<html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>专注时间管理器</title>
-  <meta name="description" content="单文件专注时间管理器，支持Firebase实时数据库保存、任务与计时、白噪音、数据可视化" />
-  <!-- 简洁优雅的样式（Tailwind-like 手写） -->
-  <style>
-    :root{--bg:#0f1724;--card:#0b1520;--muted:#94a3b8;--accent:#7c3aed;--glass:rgba(255,255,255,0.04)}
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue','Noto Sans','Apple Color Emoji','Segoe UI Emoji';background:linear-gradient(180deg,#081026 0%, #071428 60%);color:#e6eef8}
-    .container{max-width:1100px;margin:28px auto;padding:20px}
-    header{display:flex;gap:16px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
-    h1{font-size:20px;margin:0}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:16px;box-shadow:0 6px 20px rgba(3,7,18,0.6);border:1px solid rgba(255,255,255,0.04)}
-    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;margin-top:18px}
-    .section-title{font-size:14px;color:var(--muted);margin-bottom:8px}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
-    input[type=text],select,input[type=number]{width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;border:none;cursor:pointer}
-    .muted{color:var(--muted);font-size:13px}
-    .tasks{display:flex;flex-direction:column;gap:8px}
-    .task{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.03)}
-    .task .meta{display:flex;gap:10px;align-items:center}
-    .controls{display:flex;gap:8px}
-    .big-timer{text-align:center;padding:20px;border-radius:12px}
-    .timer-num{font-size:48px;font-weight:700}
-    .small{font-size:12px;color:var(--muted)}
-    footer{margin-top:20px;text-align:center;color:var(--muted);font-size:13px}
-    .charts{display:flex;flex-direction:column;gap:12px}
-    canvas{background:transparent;border-radius:8px}
-    .focus-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.98),rgba(2,6,23,0.96));display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
-    .topbar{display:flex;gap:8px;align-items:center}
-    .small-pill{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;font-size:13px}
-    .noise-toggle{display:flex;align-items:center;gap:8px}
-    .row{display:flex;gap:12px;align-items:center}
-    .select{padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)}
-    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .stat{padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(255,255,255,0.01));text-align:center}
-    @media(max-width:1000px){.grid{grid-template-columns:1fr;}.stat-grid{grid-template-columns:repeat(2,1fr)}}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>专注时间管理</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+ body { font-family: Arial; margin:0; padding:0; background:#f5f5f5; }
+ header { background:#4a6cf7; color:#fff; padding:20px; font-size:22px; text-align:center; }
+ .container { padding:20px; }
+ input, button, select { padding:10px; margin:5px 0; width:100%; }
+ .task { background:#fff; padding:15px; border-radius:10px; margin-bottom:10px; }
+ #focusMode { position:fixed; top:0; left:0; width:100%; height:100%; background:#000c; display:none; color:#fff; text-align:center; padding-top:20%; font-size:40px; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="brand">
-        <div class="logo">FT</div>
-        <div>
-          <h1>专注时间管理器</h1>
-          <div class="muted">美观 · Firebase 实时保存 · 白噪音 · 数据可视化</div>
-        </div>
-      </div>
-      <div class="card" style="min-width:300px;display:flex;gap:10px;align-items:center">
-        <div style="flex:1">
-          <label>你的名字（用于登录）</label>
-          <input id="usernameInput" type="text" placeholder="输入你的名字，例如：小明" />
-        </div>
-        <div style="align-self:flex-end">
-          <button id="loginBtn" class="btn">登录</button>
-        </div>
-      </div>
-    </header>
+<header>专注时间管理</header>
+<div class="container">
+ <h3>登录</h3>
+ <input id="username" placeholder="输入你的名字" />
+ <button id="loginBtn">登录</button>
+ <div id="userDisplay" style="margin-top:10px;font-weight:bold;"></div>
 
-    <div class="grid">
-      <!-- 左侧 主功能区 -->
-      <div>
-        <div class="card">
-          <div class="section-title">当前用户</div>
-          <div id="currentUser" style="display:flex;align-items:center;justify-content:space-between">
-            <div>
-              <div style="font-weight:700;font-size:16px" id="displayName">未登录</div>
-              <div class="muted">登录后，数据会保存到你的 Firebase 实时数据库（本地化用户名）</div>
-            </div>
-            <div class="muted">ID: <span id="userIdLabel">-</span></div>
-          </div>
-        </div>
+ <h3>添加任务</h3>
+ <input id="taskName" placeholder="任务名称" />
+ <select id="mode">
+   <option value="countdown">倒计时</option>
+   <option value="timer">正计时</option>
+ </select>
+ <input id="duration" type="number" placeholder="时长（分钟）" />
+ <button id="addTask">添加任务</button>
+ <div id="taskList"></div>
 
-        <div class="card" style="margin-top:12px">
-          <div class="section-title">任务清单（添加你想要专注的任务）</div>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <input id="taskTitle" type="text" placeholder="任务名称：例如 背 100 单词" />
-            <select id="timerType" class="select">
-              <option value="countdown">倒计时</option>
-              <option value="stopwatch">正计时</option>
-            </select>
-            <input id="taskMinutes" type="number" min="1" placeholder="分钟" style="width:86px" />
-            <button id="addTaskBtn" class="btn">添加任务</button>
-          </div>
-          <div class="tasks" id="tasksList">
-            <!-- 动态添加 -->
-          </div>
-        </div>
+ <h3>统计图表</h3>
+ <canvas id="chartDaily"></canvas>
+</div>
 
-        <div class="card" style="margin-top:12px">
-          <div class="section-title">计时器</div>
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-            <select id="chooseTask" class="select" style="flex:1"><option value="__free">自由计时（无任务）</option></select>
-            <select id="preset" class="select">
-              <option value="25">标准 25 分钟</option>
-              <option value="15">15 分钟</option>
-              <option value="50">50 分钟</option>
-              <option value="custom">自定义</option>
-            </select>
-            <input id="customMinutes" type="number" min="1" placeholder="分钟" style="width:86px;display:none" />
-          </div>
+<div id="focusMode">专注中...</div>
 
-          <div class="big-timer">
-            <div class="timer-num" id="timeDisplay">00:00</div>
-            <div class="small muted" id="timerModeLabel">准备就绪</div>
-            <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
-              <button id="startBtn" class="btn">启动专注模式</button>
-              <button id="pauseBtn" class="btn" style="background:#334155">暂停</button>
-              <button id="resetBtn" class="btn" style="background:#0ea5a4">重置</button>
-            </div>
-            <div style="margin-top:8px;display:flex;gap:10px;justify-content:center;align-items:center">
-              <label class="small">专注模式</label>
-              <select id="focusStyle" class="select"><option value="fullscreen">沉浸（全屏）</option><option value="overlay">简洁（遮罩）</option></select>
-              <div style="width:1px;height:28px;background:rgba(255,255,255,0.03)"></div>
-              <div class="noise-toggle">
-                <label class="small">白噪音</label>
-                <select id="noiseSelect" class="select"><option value="none">无</option><option value="white">白噪音</option><option value="brown">棕色噪音</option><option value="rain">模拟雨声</option></select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <div class="section-title">统计（今天 / 最近一周 / 本月）</div>
-          <div class="stat-grid" style="margin-bottom:12px">
-            <div class="stat"><div class="muted">今日专注</div><div id="statToday" style="font-weight:700;margin-top:8px">0m</div></div>
-            <div class="stat"><div class="muted">本周专注</div><div id="statWeek" style="font-weight:700;margin-top:8px">0m</div></div>
-            <div class="stat"><div class="muted">本月专注</div><div id="statMonth" style="font-weight:700;margin-top:8px">0m</div></div>
-          </div>
-
-          <div class="charts">
-            <canvas id="pieChart" height="120"></canvas>
-            <canvas id="barChart" height="140"></canvas>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- 右侧 辅助区 -->
-      <div>
-        <div class="card">
-          <div class="section-title">历史会话</div>
-          <div id="sessionList" style="max-height:300px;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <div class="section-title">导出 / 测试</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button id="exportBtn" class="btn">导出本地 JSON</button>
-            <button id="clearLocalBtn" class="btn" style="background:#ef4444">清空本地数据（仅本地）</button>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <div class="section-title">说明（请替换 Firebase 配置）</div>
-          <div class="muted" style="font-size:13px;line-height:1.6">
-            在脚本顶部替换 <code>const firebaseConfig = {
+<script>
+// --- Firebase 配置 ---
+const firebaseConfig = {
   apiKey: "AIzaSyDQkQFi2b0br4UemJP6Zhb-DckDx__pUs8",
   authDomain: "to-do-89a4f.firebaseapp.com",
   databaseURL: "https://to-do-89a4f-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -170,430 +51,84 @@
   messagingSenderId: "894992095532",
   appId: "1:894992095532:web:06fb10726bb2dc5c643489",
   measurementId: "G-W8BWH3WB50"
-};</code> 常量为你自己的 Firebase 项目配置；
-            使用实时数据库（Realtime Database）并设置规则以便读写。
-          </div>
-        </div>
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-      </div>
-    </div>
+let currentUser = null;
 
-    <footer class="muted">© 专注时间管理器 | 单文件演示（index.html） — 记得替换 Firebase 配置</footer>
-  </div>
+// 登录
+loginBtn.onclick = () => {
+  const name = username.value.trim();
+  if (!name) return alert("请输入名字");
+  currentUser = name;
+  userDisplay.innerText = "当前用户：" + name;
+};
 
-  <!-- 底部脚本：外部库 CDN -->
-  <!-- Firebase v8 (兼容风格，便于在单文件中使用 Realtime DB) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+// 添加任务
+addTask.onclick = () => {
+  if (!currentUser) return alert("请先登录");
+  const t = taskName.value.trim();
+  const m = mode.value;
+  const d = parseInt(duration.value);
+  if (!t || !d) return alert("请填写完整信息");
+  const id = Date.now();
+  const task = { name: t, mode: m, duration: d };
 
-  <script>
-    /************* 配置区域（请替换为你的 Firebase 配置） *************/
-    const FIREBASE_CONFIG = {
-      apiKey: "REPLACE_WITH_YOUR_API_KEY",
-      authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-      databaseURL: "REPLACE_WITH_YOUR_DATABASE_URL",
-      projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-      storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-      messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-      appId: "REPLACE_WITH_YOUR_APP_ID"
-    };
+  const div = document.createElement("div");
+  div.className = "task";
+  div.innerHTML = `<b>${t}</b> (${m === 'countdown' ? '倒计时' : '正计时'} ${d}分钟)
+                   <button onclick="startFocus(${id}, '${t}', '${m}', ${d})">开始</button>`;
+  taskList.appendChild(div);
 
-    // 初始化 Firebase（小心不要在公共场景泄露密钥）
-    if (!firebase.apps.length) {
-      firebase.initializeApp(FIREBASE_CONFIG);
+  db.ref("tasks/" + currentUser + "/" + id).set(task);
+};
+
+// 专注模式
+function startFocus(id, name, mode, duration) {
+  focusMode.style.display = "block";
+  const start = Date.now();
+  let totalMs = duration * 60000;
+
+  let timer = setInterval(() => {
+    let passed = Date.now() - start;
+    if (mode === "countdown") {
+      if (passed >= totalMs) {
+        clearInterval(timer);
+        endFocus(duration);
+      }
     }
-    const db = firebase.database();
+  }, 1000);
 
-    /************* 简单本地用户会话管理（不使用 Firebase Auth，靠用户名） *************/
-    const usernameInput = document.getElementById('usernameInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const displayName = document.getElementById('displayName');
-    const userIdLabel = document.getElementById('userIdLabel');
+  focusMode.onclick = () => {
+    clearInterval(timer);
+    let mins = Math.round((Date.now() - start) / 60000);
+    endFocus(mins);
+  };
+}
 
-    let currentUser = localStorage.getItem('ft_username') || null;
-    if (currentUser) setUser(currentUser);
+function endFocus(mins) {
+  focusMode.style.display = "none";
+  if (!currentUser) return;
+  const day = new Date().toISOString().slice(0, 10);
+  db.ref("records/" + currentUser + "/" + day).transaction(v => (v || 0) + mins);
+  alert("本次专注完成：" + mins + " 分钟");
+  loadStats();
+}
 
-    loginBtn.addEventListener('click', ()=>{
-      const name = usernameInput.value.trim();
-      if(!name){alert('请输入名字');return}
-      localStorage.setItem('ft_username', name);
-      setUser(name);
+// 加载图表
+function loadStats() {
+  if (!currentUser) return;
+  db.ref("records/" + currentUser).once("value", snap => {
+    const data = snap.val() || {};
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+    new Chart(document.getElementById("chartDaily"), {
+      type: "bar",
+      data: { labels, datasets:[{ label:"专注时长(分钟)", data: values }] },
     });
-
-    function setUser(name){
-      currentUser = name;
-      displayName.textContent = name;
-      userIdLabel.textContent = encodeId(name);
-      usernameInput.value = name;
-      loadTasks();
-      loadSessions();
-    }
-
-    function encodeId(s){return btoa(unescape(encodeURIComponent(s))).slice(0,12)}
-
-    /************* 任务管理 *************/
-    const taskTitle = document.getElementById('taskTitle');
-    const timerType = document.getElementById('timerType');
-    const taskMinutes = document.getElementById('taskMinutes');
-    const addTaskBtn = document.getElementById('addTaskBtn');
-    const tasksList = document.getElementById('tasksList');
-    const chooseTask = document.getElementById('chooseTask');
-
-    function taskKey(){return 'ft_tasks_' + (currentUser||'guest')}
-
-    function saveLocalTasks(tasks){localStorage.setItem(taskKey(), JSON.stringify(tasks))}
-    function loadLocalTasks(){try{return JSON.parse(localStorage.getItem(taskKey())||'[]')}catch(e){return []}}
-
-    addTaskBtn.addEventListener('click', ()=>{
-      const t = taskTitle.value.trim();
-      const type = timerType.value;
-      const mins = parseInt(taskMinutes.value) || 25;
-      if(!t){alert('请输入任务名称');return}
-      const tasks = loadLocalTasks();
-      const id = 'task_' + Date.now();
-      const task = {id,title:t,type,mins,created:Date.now()};
-      tasks.unshift(task);
-      saveLocalTasks(tasks);
-      renderTasks(tasks);
-      taskTitle.value='';taskMinutes.value='';
-      // add to choose list
-      const opt = document.createElement('option');opt.value=id;opt.textContent=t;chooseTask.appendChild(opt);
-    });
-
-    function renderTasks(tasks){
-      tasksList.innerHTML='';
-      chooseTask.innerHTML='<option value="__free">自由计时（无任务）</option>';
-      tasks.forEach(t=>{
-        const el = document.createElement('div');el.className='task';
-        el.innerHTML = `<div class="meta"><div style="font-weight:700">${escapeHtml(t.title)}</div><div class="muted">${t.type==='countdown'?'倒计时':'正计时'} • ${t.mins} 分钟</div></div>
-                        <div class="controls"><button class="btn smallBtn" data-id="${t.id}" data-act="start">开始</button><button class="btn smallBtn" data-id="${t.id}" data-act="del" style="background:#ef4444">删除</button></div>`;
-        tasksList.appendChild(el);
-        const opt = document.createElement('option');opt.value=t.id;opt.textContent=t.title;chooseTask.appendChild(opt);
-      });
-    }
-
-    tasksList.addEventListener('click', (e)=>{
-      const b = e.target.closest('button'); if(!b)return;
-      const id=b.dataset.id; const act=b.dataset.act;
-      if(act==='del'){
-        let tasks = loadLocalTasks(); tasks = tasks.filter(x=>x.id!==id); saveLocalTasks(tasks); renderTasks(tasks);
-      }
-      if(act==='start'){
-        // select task and start
-        chooseTask.value = id; preset.value = 'custom'; customMinutes.style.display='inline-block';
-        const tasks = loadLocalTasks(); const t = tasks.find(x=>x.id===id);
-        if(t){customMinutes.value = t.mins; startFocus();}
-      }
-    });
-
-    function loadTasks(){
-      const tasks = loadLocalTasks(); renderTasks(tasks);
-    }
-
-    function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
-
-    /************* 计时逻辑 *************/
-    const preset = document.getElementById('preset');
-    const customMinutes = document.getElementById('customMinutes');
-    const timeDisplay = document.getElementById('timeDisplay');
-    const timerModeLabel = document.getElementById('timerModeLabel');
-    const startBtn = document.getElementById('startBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const focusStyle = document.getElementById('focusStyle');
-    const noiseSelect = document.getElementById('noiseSelect');
-
-    let timerState = {
-      running:false, paused:false, startTime:null, elapsed:0, duration:0, mode:'countdown', sessionTask:null, sessionId:null
-    };
-    let timerInterval=null;
-
-    preset.addEventListener('change', ()=>{
-      if(preset.value==='custom'){customMinutes.style.display='inline-block';}else{customMinutes.style.display='none'}
-    });
-
-    startBtn.addEventListener('click', startFocus);
-    pauseBtn.addEventListener('click', ()=>{togglePause();});
-    resetBtn.addEventListener('click', resetTimer);
-
-    function startFocus(){
-      if(!currentUser){alert('请先登录（输入名字并点击登录）');return}
-      const taskId = chooseTask.value;
-      const pres = preset.value==='custom'?parseInt(customMinutes.value||25):parseInt(preset.value);
-      const mode = (()=>{
-        if(taskId==='__free')return 'countdown';
-        const tasks = loadLocalTasks(); const t = tasks.find(x=>x.id===taskId); return t? t.type : 'countdown';
-      })();
-      timerState.mode = mode;
-      timerState.duration = (mode==='countdown')? pres*60*1000 : 0; // milliseconds for countdown
-      timerState.startTime = Date.now();
-      timerState.elapsed = 0;
-      timerState.running = true; timerState.paused=false;
-      timerState.sessionTask = taskId==='__free'?null:taskId;
-      timerState.sessionId = 's_' + Date.now();
-
-      // create overlay
-      showFocusOverlay();
-      updateTimerDisplay();
-      timerInterval = setInterval(()=>{
-        if(!timerState.running || timerState.paused) return;
-        timerState.elapsed = Date.now() - timerState.startTime;
-        if(timerState.mode==='countdown'){
-          const remaining = timerState.duration - timerState.elapsed;
-          if(remaining <= 0){
-            completeSession(timerState.duration);
-            return;
-          }
-        }
-        updateTimerDisplay();
-      }, 250);
-
-      // start audio if selected
-      startNoise(noiseSelect.value);
-    }
-
-    function togglePause(){
-      if(!timerState.running) return;
-      if(!timerState.paused){ // pause
-        timerState.paused = true; timerState.pauseAt = Date.now(); timerModeLabel.textContent='已暂停'; stopNoise();
-      } else { // resume
-        timerState.paused = false; const pausedFor = Date.now() - timerState.pauseAt; timerState.startTime += pausedFor; startNoise(noiseSelect.value);
-      }
-      updateTimerDisplay();
-    }
-
-    function resetTimer(){
-      clearInterval(timerInterval); timerInterval=null; timerState = {running:false,paused:false,startTime:null,elapsed:0,duration:0,mode:'countdown',sessionTask:null,sessionId:null}; updateTimerDisplay(); hideFocusOverlay(); stopNoise();
-    }
-
-    function updateTimerDisplay(){
-      let ms=0; if(timerState.mode==='countdown') ms = Math.max(0, timerState.duration - timerState.elapsed); else ms = timerState.elapsed;
-      const s = Math.floor(ms/1000)%60; const m = Math.floor(ms/60000);
-      timeDisplay.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-      timerModeLabel.textContent = timerState.mode==='countdown' ? '倒计时' : '正计时';
-    }
-
-    /************* 专注覆盖层（沉浸式） *************/
-    let overlayEl=null;
-    function showFocusOverlay(){
-      if(overlayEl) return; overlayEl = document.createElement('div'); overlayEl.className='focus-overlay';
-      overlayEl.innerHTML = `
-        <div style="max-width:900px;width:100%">
-          <div class="topbar" style="justify-content:space-between;margin-bottom:30px">
-            <div style="display:flex;align-items:center;gap:12px"><div class="small-pill">专注中</div><div class="muted" id="overlayTask">${timerState.sessionTask || '自由计时'}</div></div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="muted">剩余</div><div style="font-size:32px;font-weight:700" id="overlayTime">${timeDisplay.textContent}</div>
-              <button id="overlayStop" class="btn" style="background:#ef4444">结束</button>
-            </div>
-          </div>
-          <div style="text-align:center"><div class="muted" id="overlayTip">保持沉浸，专注完成任务 ✨</div></div>
-        </div>
-      `;
-      document.body.appendChild(overlayEl);
-      document.getElementById('overlayStop').addEventListener('click', ()=>{completeSession(timerState.elapsed)});
-      // update overlay timer
-      const ovInt = setInterval(()=>{
-        if(!overlayEl){clearInterval(ovInt);return}
-        const otimeEl = document.getElementById('overlayTime'); if(otimeEl) otimeEl.textContent = timeDisplay.textContent;
-      },300);
-      // request fullscreen if selected
-      if(focusStyle.value==='fullscreen'){
-        document.documentElement.requestFullscreen?.().catch(()=>{});
-      }
-    }
-
-    function hideFocusOverlay(){
-      if(overlayEl){overlayEl.remove(); overlayEl=null;}
-      if(document.fullscreenElement) document.exitFullscreen?.();
-    }
-
-    /************* 会话完成保存到 Firebase & 本地历史 *************/
-    function completeSession(durationMs){
-      // stop timer
-      clearInterval(timerInterval); timerInterval=null; timerState.running=false; timerState.elapsed = durationMs || timerState.elapsed;
-      const session = {
-        id: timerState.sessionId || ('s_'+Date.now()),
-        taskId: timerState.sessionTask || null,
-        start: timerState.startTime,
-        end: Date.now(),
-        duration: timerState.mode==='countdown' ? (timerState.duration) : timerState.elapsed,
-        createdAt: Date.now()
-      };
-      // store locally
-      saveSessionLocal(session);
-      // push to firebase under users/{username}/sessions
-      if(currentUser){
-        try{ db.ref('users/' + encodeId(currentUser) + '/sessions/' + session.id).set(session); }catch(e){console.warn('firebase write failed',e)}
-      }
-      // update UI
-      hideFocusOverlay(); stopNoise(); resetTimer(); loadSessions();
-    }
-
-    function saveSessionLocal(s){
-      const arr = JSON.parse(localStorage.getItem('ft_sessions_' + (currentUser||'guest'))||'[]');
-      arr.unshift(s); localStorage.setItem('ft_sessions_' + (currentUser||'guest'), JSON.stringify(arr));
-    }
-
-    function loadSessions(){
-      const sessions = JSON.parse(localStorage.getItem('ft_sessions_' + (currentUser||'guest'))||'[]');
-      renderSessions(sessions);
-      aggregateAndRender(sessions);
-      // also try to fetch from firebase and merge (best-effort)
-      if(currentUser){
-        db.ref('users/' + encodeId(currentUser) + '/sessions').limitToLast(200).once('value', snap=>{
-          const val = snap.val() || {};
-          const remote = Object.values(val);
-          // merge unique by id
-          const map = {}; remote.concat(sessions).forEach(it=>map[it.id]=it);
-          const merged = Object.values(map).sort((a,b)=>b.createdAt - a.createdAt);
-          localStorage.setItem('ft_sessions_' + (currentUser||'guest'), JSON.stringify(merged));
-          renderSessions(merged); aggregateAndRender(merged);
-        });
-      }
-    }
-
-    function renderSessions(sessions){
-      const list = document.getElementById('sessionList'); list.innerHTML='';
-      sessions.slice(0,100).forEach(s=>{
-        const el = document.createElement('div'); el.className='task';
-        const d = new Date(s.createdAt);
-        el.innerHTML = `<div><div style="font-weight:700">${s.taskId||'自由计时'}</div><div class="muted">${d.toLocaleString()} • ${Math.round((s.duration||0)/60000)} 分钟</div></div>
-                        <div><button class="btn" data-id="${s.id}" data-act="del">删除</button></div>`;
-        list.appendChild(el);
-      });
-      list.querySelectorAll('button').forEach(b=>b.addEventListener('click',(ev)=>{
-        const id = b.dataset.id; const act=b.dataset.act;
-        if(act==='del'){
-          let sessions = JSON.parse(localStorage.getItem('ft_sessions_' + (currentUser||'guest'))||'[]'); sessions = sessions.filter(x=>x.id!==id); localStorage.setItem('ft_sessions_' + (currentUser||'guest'), JSON.stringify(sessions)); renderSessions(sessions); aggregateAndRender(sessions);
-        }
-      }));
-    }
-
-    /************* 统计与图表 *************/
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const barCtx = document.getElementById('barChart').getContext('2d');
-    let pieChart=null, barChart=null;
-
-    function aggregateAndRender(sessions){
-      // sessions: array of {taskId, duration, createdAt}
-      const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-      const dayMs = 24*60*60*1000;
-      const startOfWeek = startOfDay - (now.getDay()? (now.getDay()-1)*dayMs : 6*dayMs); // Mon as first day
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-
-      let totalToday=0,totalWeek=0,totalMonth=0;
-      const byTask = {}; // taskId -> minutes
-      const last7 = Array.from({length:7},(_,i)=>0);
-
-      sessions.forEach(s=>{
-        const dur = (s.duration||0);
-        const t = s.createdAt || s.start || 0;
-        if(t >= startOfDay) totalToday += dur;
-        if(t >= startOfWeek) totalWeek += dur;
-        if(t >= startOfMonth) totalMonth += dur;
-        const key = s.taskId || '自由'; byTask[key] = (byTask[key]||0) + dur;
-        // distribute to last7 days
-        const dayIndex = Math.floor((startOfDay - new Date(startOfDay).getTime() + (t - startOfDay))/dayMs) + 0; // simpler approach
-        const diffDays = Math.floor((startOfDay - t)/dayMs) * -1;
-        const idx = 6 - diffDays; // map to 0..6
-        const di = Math.floor((t - startOfDay)/dayMs) + 0; // not very precise but acceptable for demo
-        const dayDiff = Math.floor((t - startOfDay)/dayMs);
-        const daysAgo = Math.floor((startOfDay - t)/dayMs) * -1;
-        const dIdx = 6 - Math.round((startOfDay - t)/dayMs) * -1; // skip - this is messy; instead compute day offset in simple way
-      });
-
-      // For last7 bars, compute totals per day
-      const last7Totals = [];
-      for(let i=6;i>=0;i--){
-        const dayStart = startOfDay - i*dayMs;
-        const dayEnd = dayStart + dayMs;
-        const sum = sessions.filter(s=>{const t = s.createdAt||s.start||0; return t >= dayStart && t < dayEnd}).reduce((a,b)=>a+(b.duration||0),0);
-        last7Totals.push(Math.round(sum/60000));
-      }
-
-      document.getElementById('statToday').textContent = Math.round(totalToday/60000) + ' m';
-      document.getElementById('statWeek').textContent = Math.round(totalWeek/60000) + ' m';
-      document.getElementById('statMonth').textContent = Math.round(totalMonth/60000) + ' m';
-
-      // pie: by task share
-      const labels = Object.keys(byTask);
-      const data = labels.map(k=>Math.round((byTask[k]||0)/60000));
-      if(pieChart) pieChart.destroy();
-      pieChart = new Chart(pieCtx, {type:'pie',data:{labels,data:{},datasets:[{data,backgroundColor:generatePalette(labels.length)}]}});
-
-      // bar: last 7 days
-      const daysLabels = [];
-      for(let i=6;i>=0;i--){ const d = new Date(startOfDay - i*dayMs); daysLabels.push((d.getMonth()+1) + '/' + d.getDate()); }
-      if(barChart) barChart.destroy();
-      barChart = new Chart(barCtx, {type:'bar',data:{labels:daysLabels,datasets:[{label:'每日专注 (分钟)',data:last7Totals}]},options:{scales:{y:{beginAtZero:true}}}});
-    }
-
-    function generatePalette(n){
-      const out=[]; for(let i=0;i<n;i++){ const h = Math.round((i*47)%360); out.push('hsl('+h+',60%,60%)'); } return out;
-    }
-
-    /************* 白噪音（使用 WebAudio 动态生成） *************/
-    let audioCtx=null, noiseNode=null, noiseGain=null;
-    function startNoise(type){
-      stopNoise();
-      if(type==='none') return;
-      try{
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        noiseGain = audioCtx.createGain(); noiseGain.gain.value = 0.2; noiseGain.connect(audioCtx.destination);
-        if(type==='white' || type==='brown'){
-          // create buffer source with random values
-          const bufferSize = 2 * audioCtx.sampleRate;
-          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-          const data = buffer.getChannelData(0);
-          let lastOut=0.0;
-          for(let i=0;i<bufferSize;i++){
-            let val = Math.random()*2 -1;
-            if(type==='brown'){ val = (lastOut + (0.02 * val)) / 1.02; lastOut = val; val *= 3.5; }
-            data[i] = val;
-          }
-          noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = buffer; noiseNode.loop = true; noiseNode.connect(noiseGain); noiseNode.start();
-        } else if(type==='rain'){
-          // simple synthesized rain (looping buffer of percussive drops)
-          const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 3, audioCtx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for(let i=0;i<data.length;i++) data[i]=0;
-          for(let i=0;i<120;i++){
-            const pos = Math.floor(Math.random()*data.length);
-            const len = Math.floor(100 + Math.random()*400);
-            for(let j=0;j<len && (pos+j)<data.length;j++) data[pos+j] += (Math.random()*2-1) * Math.exp(-j/60);
-          }
-          noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = buffer; noiseNode.loop = true; noiseNode.connect(noiseGain); noiseNode.start();
-        }
-      }catch(e){console.warn('audio err',e)}
-    }
-    function stopNoise(){ if(noiseNode){ try{noiseNode.stop();noiseNode.disconnect(); }catch(e){} noiseNode=null;} if(noiseGain){noiseGain.disconnect();noiseGain=null;} if(audioCtx){try{audioCtx.close()}catch(e){} audioCtx=null; }
-    }
-
-    /************* 导出与清理 *************/
-    document.getElementById('exportBtn').addEventListener('click', ()=>{
-      const sessions = localStorage.getItem('ft_sessions_' + (currentUser||'guest')) || '[]';
-      const blob = new Blob([sessions], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download = (currentUser||'guest') + '_sessions.json'; a.click(); URL.revokeObjectURL(url);
-    });
-
-    document.getElementById('clearLocalBtn').addEventListener('click', ()=>{
-      if(confirm('确认清空本地数据？此操作不可撤销（仅清除本地）')){
-        localStorage.removeItem('ft_sessions_' + (currentUser||'guest')); localStorage.removeItem(taskKey()); loadSessions(); loadTasks();
-      }
-    });
-
-    /************* 启动时尝试加载数据 *************/
-    loadTasks(); loadSessions();
-
-    // small helper to try updating firebase config prompt if not replaced
-    if(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.includes('REPLACE')){
-      console.warn('请替换 FIREBASE_CONFIG 为你自己的配置');
-    }
-
-  </script>
+  });
+}
+</script>
 </body>
 </html>

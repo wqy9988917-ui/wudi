@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>专注时间管理</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>专注时间管理系统</title>
+
+<!-- ========== 全局样式，更稳定可交互 ========== -->
 <style>
   body {
     margin: 0;
     font-family: "Segoe UI", sans-serif;
-    background: linear-gradient(135deg, #0f0f1a, #1d253b);
+    background: #0f1218;
     color: #fff;
   }
   header {
@@ -16,154 +18,68 @@
     text-align: center;
     font-size: 32px;
     font-weight: bold;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: #1a1f2b;
   }
   .container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: auto;
     padding: 20px;
   }
   .card {
-    background: rgba(255,255,255,0.06);
-    margin-top: 20px;
+    background: #1f2533;
     padding: 20px;
     border-radius: 16px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    backdrop-filter: blur(8px);
+    margin-top: 20px;
   }
   input, select {
-    padding: 10px;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
     border-radius: 10px;
     border: none;
-    width: 100%;
-    margin-top: 8px;
-    margin-bottom: 15px;
+    background: #2a3142;
+    color: #fff;
   }
   button {
-    padding: 12px 22px;
-    background: #4e9cff;
-    color: #fff;
+    background: #4e8cff;
+    padding: 12px 18px;
     border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  button:hover {
-    background: #1f6fe0;
-  }
-  .task-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    margin: 5px 0;
-    background: rgba(255,255,255,0.05);
     border-radius: 10px;
-  }
-  audio {
-    width: 100%;
+    color: #fff;
+    cursor: pointer;
     margin-top: 10px;
   }
+  button:hover {
+    background: #2e6ee8;
+  }
+  .task-item {
+    background: #2a3142;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
 </style>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDQkQFi2b0br4UemJP6Zhb-DckDx__pUs8",
-  authDomain: "to-do-89a4f.firebaseapp.com",
-  databaseURL: "https://to-do-89a4f-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "to-do-89a4f",
-  storageBucket: "to-do-89a4f.firebasestorage.app",
-  messagingSenderId: "894992095532",
-  appId: "1:894992095532:web:06fb10726bb2dc5c643489",
-  measurementId: "G-W8BWH3WB50"
-};
-
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-let username = "";
-let timer = null;
-let seconds = 0;
-
-function login() {
-  username = document.getElementById("username").value;
-  if (!username) return alert("请输入用户名");
-  document.getElementById("loginSection").style.display = "none";
-  document.getElementById("mainSection").style.display = "block";
-}
-
-function addTask() {
-  const name = document.getElementById("taskName").value;
-  const mode = document.getElementById("taskMode").value;
-  const minutes = document.getElementById("taskMinutes").value;
-  if (!name) return;
-  const taskId = Date.now();
-  db.ref(`users/${username}/tasks/${taskId}`).set({name, mode, minutes});
-  renderTasks();
-}
-
-function deleteTask(id) {
-  db.ref(`users/${username}/tasks/${id}`).remove();
-  renderTasks();
-}
-
-function renderTasks() {
-  const area = document.getElementById("taskList");
-  area.innerHTML = "";
-  db.ref(`users/${username}/tasks`).once("value", snap => {
-    snap.forEach(child => {
-      const t = child.val();
-      area.innerHTML += `
-      <div class='task-item'>
-        <div>
-          <strong>${t.name}</strong><br>
-          ${t.mode} - ${t.minutes} 分钟
-        </div>
-        <button onclick="startTimer(${t.minutes*60})">开始</button>
-        <button onclick="deleteTask('${child.key}')" style="background:#ff5c5c">删除</button>
-      </div>`;
-    });
-  });
-}
-
-function startTimer(sec) {
-  seconds = sec;
-  clearInterval(timer);
-  timer = setInterval(() => {
-    seconds--;
-    document.getElementById("timerDisplay").innerText = format(seconds);
-    if (seconds <= 0) {
-      clearInterval(timer);
-      document.getElementById("endSound").play();
-      saveFocusRecord();
-    }
-  }, 1000);
-}
-
-function saveFocusRecord() {
-  const day = new Date().toISOString().slice(0,10);
-  db.ref(`users/${username}/focus/${day}`).push({duration: seconds});
-}
-
-function format(sec) {
-  let m = Math.floor(sec/60);
-  let s = sec%60;
-  return `${m}:${s.toString().padStart(2,'0')}`;
-}
-</script>
 </head>
 <body>
-<header>🔥 专业专注时间管理系统</header>
+<header>🔥 高级专注时间管理系统</header>
 <div class="container">
 
+<!-- 登录界面 -->
 <div id="loginSection" class="card">
   <h2>登录</h2>
   <input id="username" placeholder="请输入用户名">
   <button onclick="login()">进入系统</button>
 </div>
 
+<!-- 主界面（默认隐藏） -->
 <div id="mainSection" style="display:none;">
+
   <div class="card">
     <h2>添加任务</h2>
     <input id="taskName" placeholder="任务名称">
@@ -172,7 +88,7 @@ function format(sec) {
       <option value="正计时">正计时</option>
     </select>
     <input id="taskMinutes" type="number" placeholder="分钟数">
-    <button onclick="addTask()">添加</button>
+    <button onclick="addTask()">添加任务</button>
   </div>
 
   <div class="card">
@@ -186,25 +102,139 @@ function format(sec) {
   </div>
 
   <div class="card">
-    <h2>白噪音中心</h2>
+    <h2>白噪音</h2>
     <select id="noiseSelect" onchange="changeNoise()">
       <option value="rain.mp3">雨声</option>
       <option value="forest.mp3">森林</option>
       <option value="waves.mp3">海浪</option>
       <option value="wind.mp3">风声</option>
-      <option value="cafe.mp3">咖啡店环境</option>
+      <option value="cafe.mp3">咖啡店</option>
     </select>
     <audio id="noisePlayer" controls loop></audio>
   </div>
 </div>
 </div>
+
 <audio id="endSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+
 <script>
-function changeNoise(){
-  const n = document.getElementById("noiseSelect").value;
-  const p = document.getElementById("noisePlayer");
-  p.src = n;
-  p.play();
+// ========== Firebase 配置 ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyDQkQFi2b0br4UemJP6Zhb-DckDx__pUs8",
+  authDomain: "to-do-89a4f.firebaseapp.com",
+  databaseURL: "https://to-do-89a4f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "to-do-89a4f",
+  storageBucket: "to-do-89a4f.firebasestorage.app",
+  messagingSenderId: "894992095532",
+  appId: "1:894992095532:web:06fb10726bb2dc5c643489",
+  measurementId: "G-W8BWH3WB50"
+};
+const appFb = firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let username = "";
+let timer = null;
+let seconds = 0;
+
+// ========== 登录跳转逻辑（修复无法跳转） ==========
+function login() {
+  const name = document.getElementById("username").value.trim();
+  if (!name) {
+    alert("请输入用户名");
+    return;
+  }
+  username = name;
+
+  // 页面切换
+  document.getElementById("loginSection").style.display = "none";
+  document.getElementById("mainSection").style.display = "block";
+
+  renderTasks();
+}
+
+// ========== 添加任务 ==========
+function addTask() {
+  const name = document.getElementById("taskName").value;
+  const mode = document.getElementById("taskMode").value;
+  const minutes = document.getElementById("taskMinutes").value;
+
+  if (!name) return alert("请输入任务名称");
+
+  const taskId = Date.now();
+
+  db.ref(`users/${username}/tasks/${taskId}`).set({name, mode, minutes});
+
+  renderTasks();
+}
+
+// ========== 删除任务 ==========
+function deleteTask(id) {
+  db.ref(`users/${username}/tasks/${id}`).remove();
+  renderTasks();
+}
+
+// ========== 渲染任务列表 ==========
+function renderTasks() {
+  const area = document.getElementById("taskList");
+  area.innerHTML = "加载中...";
+
+  db.ref(`users/${username}/tasks`).once("value", snap => {
+    area.innerHTML = "";
+
+    snap.forEach(child => {
+      const t = child.val();
+
+      area.innerHTML += `
+        <div class='task-item'>
+          <div>
+            <strong>${t.name}</strong><br>
+            ${t.mode} - ${t.minutes} 分钟
+          </div>
+          <div>
+            <button onclick="startTimer(${t.minutes * 60})">开始</button>
+            <button onclick="deleteTask('${child.key}')" style="background:#ff5555;">删除</button>
+          </div>
+        </div>
+      `;
+    });
+  });
+}
+
+// ========== 启动计时 ==========
+function startTimer(sec) {
+  seconds = sec;
+  clearInterval(timer);
+
+  timer = setInterval(() => {
+    seconds--;
+    document.getElementById("timerDisplay").innerText = format(seconds);
+
+    if (seconds <= 0) {
+      clearInterval(timer);
+      document.getElementById("endSound").play();
+      saveFocusRecord();
+    }
+  }, 1000);
+}
+
+// ========== 保存数据 ==========
+function saveFocusRecord() {
+  const day = new Date().toISOString().slice(0, 10);
+  db.ref(`users/${username}/focus/${day}`).push({duration: seconds});
+}
+
+function format(sec) {
+  let m = Math.floor(sec / 60);
+  let s = sec % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+// ========== 白噪音播放 ==========
+function changeNoise() {
+  const src = document.getElementById("noiseSelect").value;
+  const player = document.getElementById("noisePlayer");
+  player.src = src;
+  player.play();
 }
 </script>
 </body>
